@@ -1,10 +1,6 @@
 #include "../treestump.h"
 
-const char FEN_START[] = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
 extern U64 searchedNodes;
-
-extern bool parse_fen(Position* position, const char fenString[]);
 
 extern void perft_test(Position position, int depth);
 
@@ -145,13 +141,13 @@ Position parse_uci_position(const char positionString[])
 
   if(!strncmp(positionString, "startpos", 8))
   {
-    parse_fen(&position, FEN_START);
+    fen_parse(&position, FEN_START);
   }
   else if(!strncmp(positionString, "fen", 3))
   {
-    parse_fen(&position, positionString + 4);
+    fen_parse(&position, positionString + 4);
   }
-  else parse_fen(&position, FEN_START);
+  else fen_parse(&position, FEN_START);
 
 
   char* movesString = strstr(positionString, "moves");

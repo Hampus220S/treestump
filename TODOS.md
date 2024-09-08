@@ -2,7 +2,6 @@
 * Rename functions, variables and files
 * Create header files, because I deleted them
 * Add comments before every function in a specific format
-* Write a program to parse every function description and lets the user lookup functions
 * Create test cases for different tricky positions and their perft results
 
 * Rename functions from convention (_create, _free, object_verb)

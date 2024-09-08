@@ -1,16 +1,17 @@
+/*
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-08
+ */
+
 #include "../treestump.h"
 
-extern bool split_string_delim(char (*stringArray)[128], const char string[], int length, const char delim[], int amount);
+const char* FEN_START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-extern const Castle CASTLE_BLACK_QUEEN;
-extern const Castle CASTLE_BLACK_KING;
-extern const Castle CASTLE_WHITE_QUEEN;
-extern const Castle CASTLE_WHITE_KING;
-
-extern const Piece SYMBOL_PIECES[];
-
-
-bool parse_fen_side(Side* side, const char string[])
+/*
+ *
+ */
+static bool fen_side_parse(Side* side, const char string[])
 {
   int stringLength = strlen(string);
 
@@ -29,7 +30,10 @@ bool parse_fen_side(Side* side, const char string[])
   return false;
 }
 
-bool parse_fen_clock(int* clock, const char string[])
+/*
+ *
+ */
+static bool fen_clock_parse(int* clock, const char string[])
 {
   int number = atoi(string);
 
@@ -40,7 +44,10 @@ bool parse_fen_clock(int* clock, const char string[])
   return true;
 }
 
-bool parse_fen_turns(int* turns, const char string[])
+/*
+ *
+ */
+static bool fen_turns_parse(int* turns, const char string[])
 {
   int number = atoi(string);
 
@@ -51,7 +58,10 @@ bool parse_fen_turns(int* turns, const char string[])
   return true;
 }
 
-bool parse_fen_passant(Square* passant, const char string[])
+/*
+ *
+ */
+static bool fen_passant_parse(Square* passant, const char string[])
 {
   if(!strcmp(string, "-"))
   {
@@ -73,7 +83,10 @@ bool parse_fen_passant(Square* passant, const char string[])
   return true;
 }
 
-bool parse_fen_castle(Castle* castle, const char string[])
+/*
+ *
+ */
+static bool fen_castle_parse(Castle* castle, const char string[])
 {
   if(!strcmp(string, "-")) return true;
 
@@ -106,7 +119,10 @@ bool parse_fen_castle(Castle* castle, const char string[])
   return true;
 }
 
-bool parse_fen_boards(U64 boards[12], const char string[])
+/*
+ *
+ */
+static bool fen_boards_parse(U64 boards[12], const char string[])
 {
   char stringArray[8][128];
 
@@ -145,7 +161,10 @@ bool parse_fen_boards(U64 boards[12], const char string[])
   return true;
 }
 
-bool parse_fen(Position* position, const char fenString[])
+/*
+ *
+ */
+bool fen_parse(Position* position, const char fenString[])
 {
   memset(position->boards, 0ULL, sizeof(position->boards));
 
@@ -166,17 +185,17 @@ bool parse_fen(Position* position, const char fenString[])
   if(!split_string_delim(stringArray, fenString, stringLength, " ", 6)) return false;
 
 
-  if(!parse_fen_boards(position->boards, stringArray[0])) return false;
+  if(!fen_boards_parse(position->boards, stringArray[0])) return false;
 
-  if(!parse_fen_side(&position->side, stringArray[1])) return false;
+  if(!fen_side_parse(&position->side, stringArray[1])) return false;
 
-  if(!parse_fen_castle(&position->castle, stringArray[2])) return false;
+  if(!fen_castle_parse(&position->castle, stringArray[2])) return false;
 
-  if(!parse_fen_passant(&position->passant, stringArray[3])) return false;
+  if(!fen_passant_parse(&position->passant, stringArray[3])) return false;
 
-  if(!parse_fen_clock(&position->clock, stringArray[4])) return false;
+  if(!fen_clock_parse(&position->clock, stringArray[4])) return false;
 
-  if(!parse_fen_turns(&position->turns, stringArray[5])) return false;
+  if(!fen_turns_parse(&position->turns, stringArray[5])) return false;
 
 
   for(Piece piece = PIECE_WHITE_PAWN; piece <= PIECE_WHITE_KING; piece++)

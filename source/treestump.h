@@ -109,6 +109,11 @@ extern const Move MOVE_NONE;
 #define MOVE_SET_PROMOTE(PROMOTE) ((PROMOTE << MOVE_SHIFT_PROMOTE) & MOVE_MASK_PROMOTE)
 
 
+#include "treestump/fen-parse.h"
+#include "treestump/string-handler.h"
+#include "treestump/engine-values.h"
+
+
 extern void init_board_lookup_lines(void);
 
 extern void init_random_keys(void);

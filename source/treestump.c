@@ -8,6 +8,9 @@
 
 #include "treestump.h"
 
+/*
+ *
+ */
 void init_all(void)
 {
   init_piece_lookup_masks();
@@ -21,6 +24,9 @@ void init_all(void)
   init_random_keys();
 }
 
+/*
+ *
+ */
 bool stdin_string(char* string)
 {
   fflush(stdin);
@@ -32,10 +38,9 @@ bool stdin_string(char* string)
   return (sscanf(buffer, "%[^\n]%*c", string) == 1);
 }
 
-extern const char FEN_START[];
-
-extern bool parse_fen(Position* position, const char fenString[]);
-
+/*
+ *
+ */
 int main(int argc, char* argv[])
 {
   init_all();
@@ -56,7 +61,7 @@ int main(int argc, char* argv[])
   else return 1;
 
   Position position;
-  parse_fen(&position, FEN_START);
+  fen_parse(&position, FEN_START);
 
   do
   {
