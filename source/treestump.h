@@ -1,3 +1,9 @@
+/*
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-08
+ */
+
 #ifndef TREESTUMP_H
 #define TREESTUMP_H
 
@@ -91,6 +97,7 @@ extern const Move MOVE_SHIFT_PROMOTE;
 
 extern const Move MOVE_NONE;
 
+// Rename to ex. MOVE_SOURCE_GET / MOVE_SOURCE_SET
 #define MOVE_GET_SOURCE(MOVE)   ((MOVE & MOVE_MASK_SOURCE)  >> MOVE_SHIFT_SOURCE)
 #define MOVE_GET_TARGET(MOVE)   ((MOVE & MOVE_MASK_TARGET)  >> MOVE_SHIFT_TARGET)
 #define MOVE_GET_PIECE(MOVE)    ((MOVE & MOVE_MASK_PIECE)   >> MOVE_SHIFT_PIECE)

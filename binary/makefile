@@ -1,32 +1,38 @@
+PROGRAM := treestump
+
 CLEAN_TARGET := clean
+HELP_TARGET  := help
 
+DELETE_CMD := rm
+
+COMPILER      := gcc
 COMPILE_FLAGS := -Wall -Werror -g -Og -std=c99 -oFast
-COMPILE_PRGRM := gcc
-COMPILE_LINKS := -lm
+LINKER_FLAGS  := -lm
 
-DELETE_FLAGS :=
-DELETE_COMND := rm
+SOURCE_DIR := ../source
+OBJECT_DIR := ../object
+BINARY_DIR := ../binary
 
-SOURCE_FOLDER := ../source
-OBJECT_FOLDER := ../object
+SOURCE_FILES := $(wildcard $(SOURCE_DIR)/*/*.c)
+HEADER_FILES := $(wildcard $(SOURCE_DIR)/*/*.c) 
 
-SOURCE_FILES := $(wildcard $(SOURCE_FOLDER)/*/*.c)
-OBJECT_FILES := $(addprefix $(OBJECT_FOLDER)/, $(notdir $(SOURCE_FILES:.c=.o)))
+OBJECT_FILES := $(addprefix $(OBJECT_DIR)/, $(notdir $(SOURCE_FILES:.c=.o)))
 
-RUNBLE_FILES := $(patsubst %.c, %, $(notdir $(wildcard $(SOURCE_FOLDER)/*.c)))
+all: $(PROGRAM)
 
-$(RUNBLE_FILES): %: $(OBJECT_FOLDER)/%.o $(OBJECT_FILES) $(SOURCE_FOLDER)/%.c $(SOURCE_FILES) $(HEADER_FILES)
-	$(COMPILE_PRGRM) $(OBJECT_FOLDER)/$@.o $(OBJECT_FILES) $(COMPILE_FLAGS) $(COMPILE_LINKS) -o $@
+$(PROGRAM): %: $(OBJECT_DIR)/%.o $(OBJECT_FILES) $(SOURCE_DIR)/%.c $(SOURCE_FILES) $(HEADER_FILES)
+	$(COMPILER) $(OBJECT_DIR)/$@.o $(OBJECT_FILES) $(COMPILE_FLAGS) $(LINKER_FLAGS) -o $(BINARY_DIR)/$@
 
-$(OBJECT_FOLDER)/%.o: $(SOURCE_FOLDER)/*/%.c 
-	$(COMPILE_PRGRM) $< -c $(COMPILE_FLAGS) -o $@
+$(OBJECT_DIR)/%.o: $(SOURCE_DIR)/*/%.c 
+	$(COMPILER) $< -c $(COMPILE_FLAGS) -o $@
 
-$(OBJECT_FOLDER)/%.o: $(SOURCE_FOLDER)/%.c 
-	$(COMPILE_PRGRM) $< -c $(COMPILE_FLAGS) -o $@
+$(OBJECT_DIR)/%.o: $(SOURCE_DIR)/%.c 
+	$(COMPILER) $< -c $(COMPILE_FLAGS) -o $@
 
-.PRECIOUS: $(OBJECT_FILES) $(RUNBLE_FILES)
-
-DELETE_FILES := $(OBJECT_FOLDER)/*.o $(RUNBLE_FILES)
+.PRECIOUS: $(OBJECT_DIR)/%.o $(PROGRAM)
 
 $(CLEAN_TARGET):
-	$(DELETE_COMND) $(DELETE_FLAGS) $(DELETE_FILES)
+	$(DELETE_CMD) $(OBJECT_DIR)/*.o $(PROGRAM)
+
+$(HELP_TARGET):
+	@echo $(PROGRAM) $(CLEAN_TARGET)

@@ -1,3 +1,11 @@
+/*
+ * treestump
+ *
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-08
+ */
+
 #include "treestump.h"
 
 void init_all(void)
@@ -33,6 +41,8 @@ int main(int argc, char* argv[])
   init_all();
 
   char uciString[256];
+
+  // Move this clearing of string elsewhere
   memset(uciString, 0, sizeof(uciString));
 
   stdin_string(uciString);
