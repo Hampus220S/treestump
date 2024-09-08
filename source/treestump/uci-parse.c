@@ -177,44 +177,129 @@ static Position uci_position_parse(const char positionString[])
 /*
  *
  */
-void uci_parse(Position* position, const char uciString[])
+static void uci_uci_handler(void)
 {
-  if(!strcmp(uciString, "uci"))
+  printf("id name TreeStump\n");
+  printf("id author Hampus Fridholm\n");
+  printf("uciok\n");
+}
+
+/*
+ *
+ */
+static void uci_isready_handler(void)
+{
+  printf("readyok\n");
+}
+
+/*
+ *
+ */
+static void uci_stop_handler(void)
+{
+  printf("bestmove a1a1\n");
+}
+
+/*
+ *
+ */
+static void uci_ucinewgame_handler(void)
+{
+
+}
+
+/*
+ *
+ */
+static void uci_ponderhit_handler(void)
+{
+
+}
+
+/*
+ *
+ */
+static void uci_quit_handler(void)
+{
+
+}
+
+/*
+ *
+ */
+static void uci_help_handler(void)
+{
+  // Read this from file and print it out
+  printf("\ntreestump is a powerful chess engine for playing and analyzing.\n\
+It is released as free software licensed under the GNU GPLv3 License.\n\
+Stockfish is normally used with a graphical user interface (GUI) and implements\n\
+the Universal Chess Interface (UCI) protocol to communicate with a GUI, an API, etc.\n\
+For any further information, visit https://github.com/official-stockfish/Stockfish#readme\n\
+or read the corresponding README.md and Copying.txt files distributed along with this program.\n\n");
+}
+
+/*
+ * Parse UCI command string and update position
+ *
+ * PARAMS
+ * - Position*   position   | Current board position
+ * - const char* uci_string | UCI command string
+ *
+ * RETURN (int status)
+ * - 0 | Success
+ * - 1 | Bad input
+ * - 2 | Unknown command
+ */
+int uci_parse(Position* position, const char* uci_string)
+{
+  if(!position || !uci_string) return 1;
+
+  if(strcmp(uci_string, "uci") == 0)
   {
-    printf("id name TreeStump\n");
-    printf("id author Hampus Fridholm\n");
-    printf("uciok\n");
+    uci_uci_handler();
   }
-  else if(!strncmp(uciString, "position", 8))
+  else if(strncmp(uci_string, "position", 8) == 0)
   {
-    *position = uci_position_parse(uciString + 9);
+    *position = uci_position_parse(uci_string + 9);
   }
-  else if(!strncmp(uciString, "go", 2))
+  else if(strncmp(uci_string, "go", 2) == 0)
   {
-    uci_go_parse(*position, uciString + 3);
+    uci_go_parse(*position, uci_string + 3);
   }
-  else if(!strcmp(uciString, "d"))
+  else if(strcmp(uci_string, "d") == 0)
   {
     position_print(*position);
   }
-  else if(!strncmp(uciString, "isready", 7))
+  else if(strncmp(uci_string, "isready", 7) == 0)
   {
-    printf("readyok\n");
+    uci_isready_handler();
   }
-  else if(!strncmp(uciString, "debug", 5))
+  else if(strcmp(uci_string, "ucinewgame") == 0)
   {
+    uci_ucinewgame_handler();
+  }
+  else if(strcmp(uci_string, "stop") == 0)
+  {
+    uci_stop_handler();
+  }
+  else if(strcmp(uci_string, "ponderhit") == 0)
+  {
+    uci_ponderhit_handler();
+  }
+  else if(strcmp(uci_string, "quit") == 0)
+  {
+    uci_quit_handler();
+  }
+  else if(strcmp(uci_string, "help") == 0)
+  {
+    uci_help_handler();
+  }
+  else
+  {
+    printf("Unknown command: '%s'. Type help for more information.\n", uci_string);
 
+    return 2;
   }
-  else if(!strcmp(uciString, "ucinewgame"))
-  {
 
-  }
-  else if(!strcmp(uciString, "stop"))
-  {
-    printf("bestmove a1a1\n");
-  }
-  else if(!strcmp(uciString, "ponderhit"))
-  {
-
-  }
+  return 0;
 }

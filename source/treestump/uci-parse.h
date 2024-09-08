@@ -13,6 +13,6 @@ extern const char* FEN_START;
 
 extern bool fen_parse(Position* position, const char fenString[]);
 
-extern void uci_parse(Position* position, const char uciString[]);
+extern int  uci_parse(Position* position, const char* uci_string);
 
 #endif // UCI_PARSE_H

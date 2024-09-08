@@ -7,6 +7,11 @@
 #ifndef TREESTUMP_H
 #define TREESTUMP_H
 
+#include <stdlib.h>
+#include <stdbool.h>
+#include <argp.h>
+#include <signal.h>
+
 #include "debug.h"
 
 #include <stdio.h>
