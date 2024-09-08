@@ -4,8 +4,8 @@
  * Last updated: 2024-09-08
  */
 
-#ifndef FEN_PARSE_H
-#define FEN_PARSE_H
+#ifndef UCI_PARSE_H
+#define UCI_PARSE_H
 
 #include "../treestump.h"
 
@@ -13,4 +13,6 @@ extern const char* FEN_START;
 
 extern bool fen_parse(Position* position, const char fenString[]);
 
-#endif // FEN_PARSE_H
+extern void uci_parse(Position* position, const char uciString[]);
+
+#endif // UCI_PARSE_H

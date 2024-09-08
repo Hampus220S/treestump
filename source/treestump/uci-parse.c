@@ -1,23 +1,17 @@
+/*
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-08
+ */
+
 #include "../treestump.h"
 
 extern U64 searchedNodes;
 
-extern void perft_test(Position position, int depth);
-
-extern Move best_move(Position position, int depth, int nodes, int movetime, MoveArray searchmoves);
-
-extern char* move_string(char* moveString, Move move);
-
-extern Move string_move(const char moveString[]);
-
-extern Move complete_move(U64 boards[12], Move move);
-
-extern void position_print(Position position);
-
-extern void make_move(Position* position, Move move);
-
-
-MoveArray string_moves(U64 boards[12], const char movesString[])
+/*
+ *
+ */
+static MoveArray string_moves(U64 boards[12], const char movesString[])
 {
   MoveArray moveArray;
 
@@ -44,7 +38,10 @@ MoveArray string_moves(U64 boards[12], const char movesString[])
   return moveArray;
 }
 
-void parse_uci_go(Position position, const char goString[])
+/*
+ *
+ */
+static void uci_go_parse(Position position, const char goString[])
 {
   if(!strncmp(goString, "perft", 5))
   {
@@ -135,7 +132,10 @@ void parse_uci_go(Position position, const char goString[])
   printf("bestmove %s\n", moveString);
 }
 
-Position parse_uci_position(const char positionString[])
+/*
+ *
+ */
+static Position uci_position_parse(const char positionString[])
 {
   Position position;
 
@@ -174,15 +174,24 @@ Position parse_uci_position(const char positionString[])
   return position;
 }
 
-void parse_uci(Position* position, const char uciString[])
+/*
+ *
+ */
+void uci_parse(Position* position, const char uciString[])
 {
-  if(!strncmp(uciString, "position", 8))
+  if(!strcmp(uciString, "uci"))
   {
-    *position = parse_uci_position(uciString + 9);
+    printf("id name TreeStump\n");
+    printf("id author Hampus Fridholm\n");
+    printf("uciok\n");
+  }
+  else if(!strncmp(uciString, "position", 8))
+  {
+    *position = uci_position_parse(uciString + 9);
   }
   else if(!strncmp(uciString, "go", 2))
   {
-    parse_uci_go(*position, uciString + 3);
+    uci_go_parse(*position, uciString + 3);
   }
   else if(!strcmp(uciString, "d"))
   {

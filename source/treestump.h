@@ -7,6 +7,8 @@
 #ifndef TREESTUMP_H
 #define TREESTUMP_H
 
+#include "debug.h"
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
@@ -109,10 +111,11 @@ extern const Move MOVE_NONE;
 #define MOVE_SET_PROMOTE(PROMOTE) ((PROMOTE << MOVE_SHIFT_PROMOTE) & MOVE_MASK_PROMOTE)
 
 
-#include "treestump/fen-parse.h"
+#include "treestump/uci-parse.h"
 #include "treestump/string-handler.h"
 #include "treestump/engine-values.h"
-
+#include "treestump/position.h"
+#include "treestump/move.h"
 
 extern void init_board_lookup_lines(void);
 
@@ -124,7 +127,5 @@ extern void init_piece_lookup_masks(void);
 
 extern void init_bishop_rook_relevant_bits(void);
 
-
-extern void parse_uci(Position* position, const char uciString[]);
 
 #endif // TREESTUMP_H

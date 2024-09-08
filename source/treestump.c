@@ -43,25 +43,14 @@ bool stdin_string(char* string)
  */
 int main(int argc, char* argv[])
 {
+  info_print("Start of main");
+
   init_all();
-
-  char uciString[256];
-
-  // Move this clearing of string elsewhere
-  memset(uciString, 0, sizeof(uciString));
-
-  stdin_string(uciString);
-
-  if(!strcmp(uciString, "uci"))
-  {
-    printf("id name TreeStump\n");
-    printf("id author Hampus Fridholm\n");
-    printf("uciok\n");
-  }
-  else return 1;
 
   Position position;
   fen_parse(&position, FEN_START);
+
+  char uciString[256];
 
   do
   {
@@ -69,9 +58,11 @@ int main(int argc, char* argv[])
 
     stdin_string(uciString);
 
-    parse_uci(&position, uciString);
+    uci_parse(&position, uciString);
   }
-  while(strcmp(uciString, "quit"));
+  while(strcmp(uciString, "quit") != 0);
+
+  info_print("End of main");
 
   return 0;
 }
