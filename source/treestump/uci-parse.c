@@ -164,7 +164,7 @@ static Position uci_position_parse(const char positionString[])
 
       Move move = complete_move(position.boards, parsedMove);
 
-      make_move(&position, move);
+      move_make(&position, move);
 
       while(*movesString && *movesString != ' ') movesString++;
 

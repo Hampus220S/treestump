@@ -121,16 +121,9 @@ extern const Move MOVE_NONE;
 #include "treestump/engine-values.h"
 #include "treestump/position.h"
 #include "treestump/move.h"
-
-extern void init_board_lookup_lines(void);
+#include "treestump/board.h"
+#include "treestump/piece.h"
 
 extern void init_random_keys(void);
-
-extern void init_piece_lookup_attacks(void);
-
-extern void init_piece_lookup_masks(void);
-
-extern void init_bishop_rook_relevant_bits(void);
-
 
 #endif // TREESTUMP_H

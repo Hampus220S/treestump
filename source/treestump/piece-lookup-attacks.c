@@ -28,10 +28,70 @@ extern U64 calculate_bishop_attacks(Square square, U64 block);
 extern U64 calculate_rook_attacks(Square square, U64 block);
 
 
+U64 BOARD_LOOKUP_LINES[BOARD_SQUARES][BOARD_SQUARES];
+
 U64 BISHOP_LOOKUP_ATTACKS[BOARD_SQUARES][512];
 
 U64 ROOK_LOOKUP_ATTACKS[BOARD_SQUARES][4096];
 
+/*
+ *
+ */
+U64 create_board_line(Square source, Square target)
+{
+  U64 board = 0ULL;
+
+  int sourceRank = (source / BOARD_FILES);
+  int sourceFile = (source % BOARD_FILES);
+
+  int targetRank = (target / BOARD_FILES);
+  int targetFile = (target % BOARD_FILES);
+
+  int rankOffset = (targetRank - sourceRank);
+  int fileOffset = (targetFile - sourceFile);
+
+  int rankFactor = (rankOffset > 0) ? +1 : -1;
+  int fileFactor = (fileOffset > 0) ? +1 : -1;
+
+  int absRankOffset = (rankOffset * rankFactor);
+  int absFileOffset = (fileOffset * fileFactor);
+
+  // If the move is not diagonal nor straight, return empty board;
+  if(!(absRankOffset == absFileOffset) && !((absRankOffset == 0) ^ (absFileOffset == 0))) return 0ULL;
+
+  int rankScalor = (rankOffset == 0) ? 0 : rankFactor;
+  int fileScalor = (fileOffset == 0) ? 0 : fileFactor;
+
+  for(int rank = sourceRank, file = sourceFile; (rank != targetRank || file != targetFile); rank += rankScalor, file += fileScalor)
+  {
+    Square square = (rank * BOARD_FILES) + file;
+
+    if(square == source || square == target) continue;
+
+    board = BOARD_SQUARE_SET(board, square);
+  }
+  return board;
+}
+
+/*
+ *
+ */
+void init_board_lookup_lines(void)
+{
+  for(Square sourceSquare = A8; sourceSquare <= H1; sourceSquare++)
+  {
+    for(Square targetSquare = A8; targetSquare <= H1; targetSquare++)
+    {
+      U64 boardLines = create_board_line(sourceSquare, targetSquare);
+
+      BOARD_LOOKUP_LINES[sourceSquare][targetSquare] = boardLines;
+    }
+  }
+}
+
+/*
+ *
+ */
 void init_rook_lookup_attacks()
 {
   for (Square square = 0; square < BOARD_SQUARES; square++)
@@ -51,6 +111,9 @@ void init_rook_lookup_attacks()
   }
 }
 
+/*
+ *
+ */
 void init_bishop_lookup_attacks()
 {
   for (Square square = 0; square < BOARD_SQUARES; square++)
@@ -70,6 +133,9 @@ void init_bishop_lookup_attacks()
   }
 }
 
+/*
+ *
+ */
 void init_piece_lookup_attacks()
 {
   init_rook_lookup_attacks();
@@ -77,6 +143,9 @@ void init_piece_lookup_attacks()
   init_bishop_lookup_attacks();
 }
 
+/*
+ *
+ */
 int bishop_cover_index(Square square, U64 cover)
 {
   U64 coverIndex = cover;
@@ -155,6 +224,8 @@ Piece boards_square_piece(U64 boards[12], Square square)
 U64 piece_lookup_attacks(Position position, Square square)
 {
   Piece piece = boards_square_piece(position.boards, square);
+
+  // Change to switch case
 
   if((piece == PIECE_WHITE_KING) || (piece == PIECE_BLACK_KING))
   {

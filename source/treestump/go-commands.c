@@ -4,13 +4,9 @@ extern char* move_string(char* moveString, Move move);
 
 extern void create_moves(MoveArray* moveArray, Position position);
 
-extern void make_move(Position* position, Move move);
-
 extern int board_ls1b_index(U64 bitboard);
 
 extern int position_score(Position position);
-
-extern bool board_square_attacked(Position position, Square square, Side side);
 
 extern void guess_order_moves(MoveArray* moveArray, Position position);
 
@@ -32,7 +28,7 @@ U64 perft_driver(Position position, int depth)
   {
     Position positionCopy = position;
 
-    make_move(&positionCopy, moveArray.moves[index]);
+    move_make(&positionCopy, moveArray.moves[index]);
 
     nodes += perft_driver(positionCopy, depth - 1);
   }
@@ -56,7 +52,7 @@ void perft_test(Position position, int depth)
   {
     Position positionCopy = position;
 
-    make_move(&positionCopy, moveArray.moves[index]);
+    move_make(&positionCopy, moveArray.moves[index]);
 
     U64 moveNodes = perft_driver(positionCopy, depth - 1);
 
@@ -105,11 +101,12 @@ int negamax(Position position, int depth, int nodes, int alpha, int beta)
 
   if(moveArray.amount <= 0)
   {
+    // Put this in a new function
     U64 kingBoard = (position.side == SIDE_WHITE) ? position.boards[PIECE_WHITE_KING] : position.boards[PIECE_BLACK_KING];
 
     Square kingSquare = board_ls1b_index(kingBoard);
 
-    if(kingSquare == -1 || board_square_attacked(position, kingSquare, !position.side))
+    if(kingSquare == -1 || square_is_attacked(position, kingSquare, !position.side))
     {
       return -49000 + depth;
     }
@@ -124,7 +121,7 @@ int negamax(Position position, int depth, int nodes, int alpha, int beta)
   {
     Position positionCopy = position;
 
-    make_move(&positionCopy, moveArray.moves[index]);
+    move_make(&positionCopy, moveArray.moves[index]);
 
     int currentScore = -negamax(positionCopy, (depth - 1), nodes, -beta, -alpha);
 
@@ -167,7 +164,7 @@ Move best_move(Position position, int depth, int nodes, int movetime, MoveArray 
 
     Move currentMove = moveArray.moves[index];
 
-    make_move(&positionCopy, currentMove);
+    move_make(&positionCopy, currentMove);
 
     int currentScore = -negamax(positionCopy, (depth - 1), nodes, -50000, +50000);
 

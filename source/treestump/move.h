@@ -9,7 +9,7 @@
 
 #include "../treestump.h"
 
-extern void make_move(Position* position, Move move);
+extern void move_make(Position* position, Move move);
 
 extern void perft_test(Position position, int depth);
 
@@ -20,5 +20,7 @@ extern char* move_string(char* moveString, Move move);
 extern Move string_move(const char moveString[]);
 
 extern Move complete_move(U64 boards[12], Move move);
+
+extern bool square_is_attacked(Position position, Square square, Side side);
 
 #endif // MOVE_H

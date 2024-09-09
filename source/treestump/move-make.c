@@ -1,17 +1,17 @@
+/*
+ * Make move in position
+ *
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-08
+ */
+
 #include "../treestump.h"
 
-extern Piece boards_square_piece(U64 boards[12], Square square);
-
-extern const Castle CASTLE_BLACK_QUEEN;
-extern const Castle CASTLE_BLACK_KING;
-extern const Castle CASTLE_WHITE_QUEEN;
-extern const Castle CASTLE_WHITE_KING;
-
-extern const Castle CASTLE_WHITE;
-extern const Castle CASTLE_BLACK;
-
-
-void make_castle_move(Position* position, Move move)
+/*
+ *
+ */
+static void move_castle_make(Position* position, Move move)
 {
   Square sourceSquare = MOVE_GET_SOURCE(move);
   Square targetSquare = MOVE_GET_TARGET(move);
@@ -48,7 +48,10 @@ void make_castle_move(Position* position, Move move)
   position->castle &= (sourcePiece == PIECE_WHITE_KING) ? ~CASTLE_WHITE : ~CASTLE_BLACK;
 }
 
-void make_normal_quiet_move(Position* position, Move move)
+/*
+ *
+ */
+static void move_normal_quiet_make(Position* position, Move move)
 {
   Square sourceSquare = MOVE_GET_SOURCE(move);
   Square targetSquare = MOVE_GET_TARGET(move);
@@ -71,8 +74,10 @@ void make_normal_quiet_move(Position* position, Move move)
   position->clock++;
 }
 
-// When an illegal move of capturing own piece, the function dont work 
-void make_normal_capture_move(Position* position, Move move)
+/*
+ * When an illegal move of capturing own piece, the function dont work 
+ */
+static void move_normal_capture_make(Position* position, Move move)
 {
   Square sourceSquare = MOVE_GET_SOURCE(move);
   Square targetSquare = MOVE_GET_TARGET(move);
@@ -107,13 +112,16 @@ void make_normal_capture_move(Position* position, Move move)
   position->clock = 0;
 }
 
-void make_normal_move(Position* position, Move move)
+/*
+ *
+ */
+static void move_normal_make(Position* position, Move move)
 {
   if(move & MOVE_MASK_CAPTURE)
   {
-    make_normal_capture_move(position, move);
+    move_normal_capture_make(position, move);
   }
-  else make_normal_quiet_move(position, move);
+  else move_normal_quiet_make(position, move);
 
   // This is made for both normal moves
   Square sourceSquare = MOVE_GET_SOURCE(move);
@@ -136,7 +144,10 @@ void make_normal_move(Position* position, Move move)
   else if(sourcePiece == PIECE_BLACK_KING) position->castle &= ~CASTLE_BLACK;
 }
 
-void make_pawn_passant_move(Position* position, Move move)
+/*
+ *
+ */
+static void move_pawn_passant_make(Position* position, Move move)
 {
   Square sourceSquare = MOVE_GET_SOURCE(move);
   Square targetSquare = MOVE_GET_TARGET(move);
@@ -172,7 +183,10 @@ void make_pawn_passant_move(Position* position, Move move)
   position->covers[SIDE_BOTH] &= ~(1ULL << passantSquare);
 }
 
-void make_pawn_double_move(Position* position, Move move)
+/*
+ *
+ */
+static void move_pawn_double_make(Position* position, Move move)
 {
   Square sourceSquare = MOVE_GET_SOURCE(move);
   Square targetSquare = MOVE_GET_TARGET(move);
@@ -197,8 +211,10 @@ void make_pawn_double_move(Position* position, Move move)
   position->passant = (sourcePiece == PIECE_WHITE_PAWN) ? (sourceSquare - BOARD_FILES) : (sourceSquare + BOARD_FILES);
 }
 
-
-void make_pawn_promote_quiet_move(Position* position, Move move)
+/*
+ *
+ */
+static void move_pawn_promote_quiet_make(Position* position, Move move)
 {
   Square sourceSquare = MOVE_GET_SOURCE(move);
   Square targetSquare = MOVE_GET_TARGET(move);
@@ -223,7 +239,10 @@ void make_pawn_promote_quiet_move(Position* position, Move move)
   position->covers[SIDE_BOTH] ^= moveBoard;
 }
 
-void make_pawn_promote_capture_move(Position* position, Move move)
+/*
+ *
+ */
+static void move_pawn_promote_capture_make(Position* position, Move move)
 {
   Square sourceSquare = MOVE_GET_SOURCE(move);
   Square targetSquare = MOVE_GET_TARGET(move);
@@ -260,20 +279,25 @@ void make_pawn_promote_capture_move(Position* position, Move move)
   position->covers[SIDE_BOTH] &= ~(1ULL << sourceSquare);
 } 
 
-void make_pawn_promote_move(Position* position, Move move)
+/*
+ *
+ */
+static void move_pawn_promote_make(Position* position, Move move)
 {
   if(move & MOVE_MASK_CAPTURE)
   {
-    make_pawn_promote_capture_move(position, move);
+    move_pawn_promote_capture_make(position, move);
   }
-  else make_pawn_promote_quiet_move(position, move);
+  else move_pawn_promote_quiet_make(position, move);
 
   // This is made for both cases of promote moves
   // position->passant = PIECE_NONE;
 }
 
-// This has the same code as make_normal_quiet_move*
-void make_pawn_normal_quiet_move(Position* position, Move move)
+/*
+ * This has the same code as move_normal_quiet_make*
+ */
+static void move_pawn_normal_quiet_make(Position* position, Move move)
 {
   Square sourceSquare = MOVE_GET_SOURCE(move);
   Square targetSquare = MOVE_GET_TARGET(move);
@@ -293,8 +317,10 @@ void make_pawn_normal_quiet_move(Position* position, Move move)
   position->covers[SIDE_BOTH] ^= moveBoard;
 }
 
-// This has the same code as make_normal_capture_move*
-void make_pawn_normal_capture_move(Position* position, Move move)
+/*
+ * This has the same code as move_normal_capture_make*
+ */
+static void move_pawn_normal_capture_make(Position* position, Move move)
 {
   Square sourceSquare = MOVE_GET_SOURCE(move);
   Square targetSquare = MOVE_GET_TARGET(move);
@@ -327,41 +353,49 @@ void make_pawn_normal_capture_move(Position* position, Move move)
   position->covers[SIDE_BOTH] &= ~(1ULL << sourceSquare);
 }
 
-void make_pawn_normal_move(Position* position, Move move)
+/*
+ *
+ */
+static void move_pawn_normal_make(Position* position, Move move)
 {
   if(move & MOVE_MASK_CAPTURE)
   {
-    make_pawn_normal_capture_move(position, move);
+    move_pawn_normal_capture_make(position, move);
   }
-  else make_pawn_normal_quiet_move(position, move);
+  else move_pawn_normal_quiet_make(position, move);
 
   // This is made for both pawn normal moves
   // position->passant = PIECE_NONE;
 }
 
-void make_pawn_move(Position* position, Move move)
+/*
+ *
+ */
+static void move_pawn_make(Position* position, Move move)
 {
   if(move & MOVE_MASK_DOUBLE)
   {
-    make_pawn_double_move(position, move);
+    move_pawn_double_make(position, move);
   }
   else if(move & MOVE_MASK_PROMOTE)
   {
-    make_pawn_promote_move(position, move);
+    move_pawn_promote_make(position, move);
   }
   else if(move & MOVE_MASK_PASSANT)
   {
-    make_pawn_passant_move(position, move);
+    move_pawn_passant_make(position, move);
   }
-  else make_pawn_normal_move(position, move);
+  else move_pawn_normal_make(position, move);
 
   // This is made for every pawn move
   position->clock = 0;
 }
 
-void make_move(Position* position, Move move)
+/*
+ *
+ */
+void move_make(Position* position, Move move)
 {
-
   // This is the default for every move
   position->clock++;
 
@@ -372,13 +406,13 @@ void make_move(Position* position, Move move)
 
   if(sourcePiece == PIECE_WHITE_PAWN || sourcePiece == PIECE_BLACK_PAWN)
   {
-    make_pawn_move(position, move);
+    move_pawn_make(position, move);
   }
   else if(move & MOVE_MASK_CASTLE)
   {
-    make_castle_move(position, move);
+    move_castle_make(position, move);
   }
-  else make_normal_move(position, move);
+  else move_normal_make(position, move);
 
   // This is made for every move
   if(position->side == SIDE_BLACK) position->turns++;
