@@ -11,79 +11,80 @@
 /*
  *
  */
-void qswap_moves(Move* moves, int index1, int index2)
+static void moves_swap(Move* moves, int index1, int index2)
 {
-  Move tempMove = moves[index1];
-  moves[index1] = moves[index2];
-  moves[index2] = tempMove;
+  Move temp_move = moves[index1];
+  moves[index1]  = moves[index2];
+  moves[index2]  = temp_move;
 }
 
 /*
  *
  */
-void qswap_scores(int* scores, int index1, int index2)
+static void scores_swap(int* scores, int index1, int index2)
 {
-  int tempScore = scores[index1];
+  int temp_score = scores[index1];
   scores[index1] = scores[index2];
-  scores[index2] = tempScore;
+  scores[index2] = temp_score;
 }
 
 /*
  *
  */
-void qswap_moves_scores(Move* moves, int* scores, int index1, int index2)
+static void moves_and_scores_swap(Move* moves, int* scores, int index1, int index2)
 {
-  qswap_moves(moves, index1, index2);
+  moves_swap (moves,  index1, index2);
 
-  qswap_scores(scores, index1, index2);
+  scores_swap(scores, index1, index2);
 }
 
 /*
  *
  */
-int partly_qsort_moves(Move* moves, int* scores, int index1, int index2)
+static int moves_and_scores_partly_sort(Move* moves, int* scores, int index1, int index2)
 {
-  int pivotScore = scores[index2];
+  int pivot_score = scores[index2];
 
-  int iIndex = (index1 - 1);
+  int i_index = (index1 - 1);
 
-  for(int jIndex = index1; jIndex <= (index2 - 1); jIndex += 1)
+  for(int j_index = index1; j_index <= (index2 - 1); j_index += 1)
   {
-    if(scores[jIndex] < pivotScore) continue;
+    if(scores[j_index] < pivot_score) continue;
 
-    qswap_moves_scores(moves, scores, (++iIndex), jIndex);
+    moves_and_scores_swap(moves, scores, (++i_index), j_index);
   }
-  qswap_moves_scores(moves, scores, (iIndex + 1), index2);
 
-  return (iIndex + 1);
+  moves_and_scores_swap(moves, scores, (i_index + 1), index2);
+
+  return (i_index + 1);
 }
 
 /*
  *
  */
-void qsort_moves_indexes(Move* moves, int* scores, int index1, int index2)
+static void moves_and_scores_betwen_indexes_sort(Move* moves, int* scores, int index1, int index2)
 {
   if(index1 >= index2) return;
 
-  int partIndex = partly_qsort_moves(moves, scores, index1, index2);
+  int partIndex = moves_and_scores_partly_sort(moves, scores, index1, index2);
 
-  qsort_moves_indexes(moves, scores, index1, (partIndex - 1));
+  moves_and_scores_betwen_indexes_sort(moves, scores, index1, (partIndex - 1));
 
-  qsort_moves_indexes(moves, scores, (partIndex + 1), index2);
+  moves_and_scores_betwen_indexes_sort(moves, scores, (partIndex + 1), index2);
 }
 
 /*
  *
  */
-void qsort_moves_scores(MoveArray* moveArray, int* scores)
+static void moves_and_scores_sort(MoveArray* moveArray, int* scores)
 {
-  qsort_moves_indexes(moveArray->moves, scores, 0, (moveArray->amount - 1));
+  moves_and_scores_betwen_indexes_sort(moveArray->moves, scores, 0, (moveArray->amount - 1));
 }
 
 /*
  *
  */
-int guess_move_score(Position position, Move move)
+static int move_score_guess(Position position, Move move)
 {
   int score = 0;
 
@@ -113,22 +114,22 @@ int guess_move_score(Position position, Move move)
 /*
  *
  */
-void guess_move_scores(int* scores, Position position, MoveArray moveArray)
+static void move_scores_guess(int* scores, Position position, MoveArray moveArray)
 {
   for(int index = 0; index < moveArray.amount; index++)
   {
-    scores[index] = guess_move_score(position, moveArray.moves[index]);
+    scores[index] = move_score_guess(position, moveArray.moves[index]);
   }
 }
 
 /*
- *
+ * Order a list of moves based on calculated guesses about the moves
  */
-void guess_order_moves(MoveArray* moveArray, Position position)
+void moves_guess_order(MoveArray* moveArray, Position position)
 {
   int scores[moveArray->amount];
 
-  guess_move_scores(scores, position, *moveArray);
+  move_scores_guess(scores, position, *moveArray);
 
-  qsort_moves_scores(moveArray, scores);
+  moves_and_scores_sort(moveArray, scores);
 }

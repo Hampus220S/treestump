@@ -17,7 +17,7 @@ U64 perft_driver(Position position, int depth)
   memset(moveArray.moves, 0, sizeof(moveArray.moves));
   moveArray.amount = 0;
 
-  create_moves(&moveArray, position);
+  moves_create(&moveArray, position);
 
   int nodes = 0;
 
@@ -39,7 +39,7 @@ void perft_test(Position position, int depth)
   memset(moveArray.moves, 0, sizeof(moveArray.moves));
   moveArray.amount = 0;
 
-  create_moves(&moveArray, position);
+  moves_create(&moveArray, position);
 
   char moveString[8];
 
@@ -93,7 +93,7 @@ int negamax(Position position, int depth, int nodes, int alpha, int beta)
   memset(moveArray.moves, 0, sizeof(moveArray.moves));
   moveArray.amount = 0;
 
-  create_moves(&moveArray, position);
+  moves_create(&moveArray, position);
 
 
   if(moveArray.amount <= 0)
@@ -111,7 +111,7 @@ int negamax(Position position, int depth, int nodes, int alpha, int beta)
   }
 
 
-  guess_order_moves(&moveArray, position);
+  moves_guess_order(&moveArray, position);
 
 
   for(int index = 0; index < moveArray.amount; index++)
@@ -146,7 +146,7 @@ Move best_move(Position position, int depth, int nodes, int movetime, MoveArray 
   }
   else
   {
-    create_moves(&moveArray, position);
+    moves_create(&moveArray, position);
 
     if(moveArray.amount <= 0) return MOVE_NONE;
   }

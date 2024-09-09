@@ -11,7 +11,7 @@
 /*
  *
  */
-void create_white_pawn_promote_moves(MoveArray* moveArray, Position position, Square sourceSquare)
+static void moves_white_pawn_promote_create(MoveArray* moveArray, Position position, Square sourceSquare)
 {
   for(Square targetSquare = (sourceSquare - 9); targetSquare <= (sourceSquare - 7); targetSquare++)
   {
@@ -31,11 +31,11 @@ void create_white_pawn_promote_moves(MoveArray* moveArray, Position position, Sq
 /*
  *
  */
-void create_white_pawn_moves(MoveArray* moveArray, Position position, Square sourceSquare)
+static void moves_white_pawn_create(MoveArray* moveArray, Position position, Square sourceSquare)
 {
   if(sourceSquare >= A7 && sourceSquare <= H7)
   {
-    create_white_pawn_promote_moves(moveArray, position, sourceSquare);
+    moves_white_pawn_promote_create(moveArray, position, sourceSquare);
   }
   else // Rewrite this code
   {
@@ -60,7 +60,7 @@ void create_white_pawn_moves(MoveArray* moveArray, Position position, Square sou
 /*
  *
  */
-void create_black_pawn_promote_moves(MoveArray* moveArray, Position position, Square sourceSquare)
+static void moves_black_pawn_promote_create(MoveArray* moveArray, Position position, Square sourceSquare)
 {
   for(Square targetSquare = (sourceSquare + 7); targetSquare <= (sourceSquare + 9); targetSquare++)
   {
@@ -80,11 +80,11 @@ void create_black_pawn_promote_moves(MoveArray* moveArray, Position position, Sq
 /*
  *
  */
-void create_black_pawn_moves(MoveArray* moveArray, Position position, Square sourceSquare)
+static void moves_black_pawn_create(MoveArray* moveArray, Position position, Square sourceSquare)
 {
   if(sourceSquare >= A2 && sourceSquare <= H2)
   {
-    create_black_pawn_promote_moves(moveArray, position, sourceSquare);
+    moves_black_pawn_promote_create(moveArray, position, sourceSquare);
   }
   else // Rewrite this code
   {
@@ -109,7 +109,7 @@ void create_black_pawn_moves(MoveArray* moveArray, Position position, Square sou
 /*
  *
  */
-void create_white_castle_moves(MoveArray* moveArray, Position position)
+static void moves_white_castle_create(MoveArray* moveArray, Position position)
 {
   Move move = move_castle_create(E1, C1, PIECE_WHITE_KING);
 
@@ -123,7 +123,7 @@ void create_white_castle_moves(MoveArray* moveArray, Position position)
 /*
  *
  */
-void create_black_castle_moves(MoveArray* moveArray, Position position)
+static void moves_black_castle_create(MoveArray* moveArray, Position position)
 {
   Move move = move_castle_create(E8, C8, PIECE_BLACK_KING);
 
@@ -137,10 +137,12 @@ void create_black_castle_moves(MoveArray* moveArray, Position position)
 /*
  *
  */
-void create_white_normal_moves(MoveArray* moveArray, Position position, Square sourceSquare, Piece piece)
+static void moves_white_normal_create(MoveArray* moveArray, Position position, Square sourceSquare, Piece piece)
 {
-  if(piece == PIECE_WHITE_KING && sourceSquare == E1) create_white_castle_moves(moveArray, position);
-
+  if(piece == PIECE_WHITE_KING && sourceSquare == E1)
+  {
+    moves_white_castle_create(moveArray, position);
+  }
   
   U64 attackBoard = attacks_get(sourceSquare, position);
 
@@ -159,7 +161,7 @@ void create_white_normal_moves(MoveArray* moveArray, Position position, Square s
 /*
  *
  */
-void create_white_moves(MoveArray* moveArray, Position position)
+static void moves_white_create(MoveArray* moveArray, Position position)
 {
   for(Piece piece = PIECE_WHITE_PAWN; piece <= PIECE_WHITE_KING; piece++)
   {
@@ -169,9 +171,14 @@ void create_white_moves(MoveArray* moveArray, Position position)
     {
       Square sourceSquare = board_ls1b_index(pieceBoard);
 
-      if(piece == PIECE_WHITE_PAWN) create_white_pawn_moves(moveArray, position, sourceSquare);
-
-      else create_white_normal_moves(moveArray, position, sourceSquare, piece);
+      if(piece == PIECE_WHITE_PAWN)
+      {
+        moves_white_pawn_create(moveArray, position, sourceSquare);
+      }
+      else
+      {
+        moves_white_normal_create(moveArray, position, sourceSquare, piece);
+      }
 
       pieceBoard = BOARD_SQUARE_POP(pieceBoard, sourceSquare);
     }
@@ -181,10 +188,12 @@ void create_white_moves(MoveArray* moveArray, Position position)
 /*
  *
  */
-void create_black_normal_moves(MoveArray* moveArray, Position position, Square sourceSquare, Piece piece)
+static void moves_black_normal_create(MoveArray* moveArray, Position position, Square sourceSquare, Piece piece)
 {
-  if(piece == PIECE_BLACK_KING && sourceSquare == E8) create_black_castle_moves(moveArray, position);
-  
+  if(piece == PIECE_BLACK_KING && sourceSquare == E8)
+  {
+    moves_black_castle_create(moveArray, position);
+  }
 
   U64 attackBoard = attacks_get(sourceSquare, position);
 
@@ -203,7 +212,7 @@ void create_black_normal_moves(MoveArray* moveArray, Position position, Square s
 /*
  *
  */
-void create_black_moves(MoveArray* moveArray, Position position)
+static void moves_black_create(MoveArray* moveArray, Position position)
 {
   for(Piece piece = PIECE_BLACK_PAWN; piece <= PIECE_BLACK_KING; piece++)
   {
@@ -213,9 +222,14 @@ void create_black_moves(MoveArray* moveArray, Position position)
     {
       Square sourceSquare = board_ls1b_index(pieceBoard);
 
-      if(piece == PIECE_BLACK_PAWN) create_black_pawn_moves(moveArray, position, sourceSquare);
-      
-      else create_black_normal_moves(moveArray, position, sourceSquare, piece);
+      if(piece == PIECE_BLACK_PAWN)
+      {
+        moves_black_pawn_create(moveArray, position, sourceSquare);
+      }
+      else
+      {
+        moves_black_normal_create(moveArray, position, sourceSquare, piece);
+      }
 
       pieceBoard = BOARD_SQUARE_POP(pieceBoard, sourceSquare);
     }
@@ -223,11 +237,16 @@ void create_black_moves(MoveArray* moveArray, Position position)
 }
 
 /*
- *
+ * Create legal moves for the specified position
  */
-void create_moves(MoveArray* moveArray, Position position)
+void moves_create(MoveArray* moveArray, Position position)
 {
-  if(position.side == SIDE_WHITE) create_white_moves(moveArray, position);
-  
-  else if(position.side == SIDE_BLACK) create_black_moves(moveArray, position);
+  if(position.side == SIDE_WHITE)
+  {
+    moves_white_create(moveArray, position);
+  }
+  else if(position.side == SIDE_BLACK)
+  {
+    moves_black_create(moveArray, position);
+  }
 }
