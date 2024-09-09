@@ -9,15 +9,6 @@
 
 #include "../treestump.h"
 
-extern const Castle CASTLE_BLACK_QUEEN;
-extern const Castle CASTLE_BLACK_KING;
-extern const Castle CASTLE_WHITE_QUEEN;
-extern const Castle CASTLE_WHITE_KING;
-
-extern const Castle CASTLE_WHITE;
-extern const Castle CASTLE_BLACK;
-
-
 extern void board_lines_init(void);
 
 

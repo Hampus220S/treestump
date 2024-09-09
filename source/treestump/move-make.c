@@ -8,6 +8,10 @@
 
 #include "../treestump.h"
 
+extern const Castle SQUARE_CASTLES[];
+
+#define MOVE_BOARD_CREATE(SOURCE, TARGET) ((1ULL << (SOURCE)) ^ (1ULL << (TARGET)))
+
 /*
  *
  */
@@ -29,9 +33,9 @@ static void move_castle_make(Position* position, Move move)
 
 
 
-  U64 kingMoveBoard = ((1ULL << sourceSquare) ^ (1ULL << targetSquare));
+  U64 kingMoveBoard = MOVE_BOARD_CREATE(sourceSquare, targetSquare);
 
-  U64 rookMoveBoard = ((1ULL << rookSourceSquare) ^ (1ULL << rookTargetSquare));
+  U64 rookMoveBoard = MOVE_BOARD_CREATE(rookSourceSquare, rookTargetSquare);
 
   
   position->boards[sourcePiece] ^= kingMoveBoard;
@@ -61,7 +65,7 @@ static void move_normal_quiet_make(Position* position, Move move)
   Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
 
 
-  U64 moveBoard = ((1ULL << sourceSquare) ^ (1ULL << targetSquare));
+  U64 moveBoard = MOVE_BOARD_CREATE(sourceSquare, targetSquare);
 
   position->boards[sourcePiece] ^= moveBoard;
 
@@ -84,10 +88,10 @@ static void move_normal_capture_make(Position* position, Move move)
 
   Piece sourcePiece = MOVE_PIECE_GET(move);
 
-  Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
+  Side side = PIECE_SIDE_GET(sourcePiece);
 
 
-  U64 moveBoard = ((1ULL << sourceSquare) ^ (1ULL << targetSquare));
+  U64 moveBoard = MOVE_BOARD_CREATE(sourceSquare, targetSquare);
 
   Piece capturePiece = square_piece_get(position->boards, targetSquare);
 
@@ -113,6 +117,51 @@ static void move_normal_capture_make(Position* position, Move move)
 }
 
 /*
+ * Clear castling rights based on what source piece was moved
+ *
+ * Maybe: Change arguments to just Move move
+ *
+ * RETURN (Castle castle)
+ */
+static Castle source_square_castle_clear(Castle castle, Square source_square, Piece source_piece)
+{
+  switch(source_piece)
+  {
+    case PIECE_WHITE_ROOK: case PIECE_BLACK_ROOK:
+      castle &= ~SQUARE_CASTLES[source_square];
+      break;
+
+    case PIECE_WHITE_KING:
+      castle &= ~CASTLE_WHITE;
+      break;
+
+    case PIECE_BLACK_KING:
+      castle &= ~CASTLE_BLACK;
+      break;
+
+    default:
+      break;
+  }
+
+  return castle;
+}
+
+/*
+ * Clear castling rights based on what target piece was captured
+ *
+ * If the target square is a corner square - where a rook stands in the beginning
+ * - clear that rook's castling right
+ *
+ * Maybe: Change arguments to just Move move
+ *
+ * RETURN (Castle castle)
+ */
+static Castle target_square_castle_clear(Castle castle, Square target_square)
+{
+  return castle & ~SQUARE_CASTLES[target_square];
+}
+
+/*
  *
  */
 static void move_normal_make(Position* position, Move move)
@@ -123,25 +172,11 @@ static void move_normal_make(Position* position, Move move)
   }
   else move_normal_quiet_make(position, move);
 
-  // This is made for both normal moves
-  Square sourceSquare = MOVE_SOURCE_GET(move);
-  Piece  sourcePiece  = MOVE_PIECE_GET(move);
+  // The following will execute for both normal moves
+  Square source_square = MOVE_SOURCE_GET(move);
+  Piece  source_piece  = MOVE_PIECE_GET(move);
 
-  // Fix: Clear the castling rights if the rook gets captures as well!
-  if(sourcePiece == PIECE_WHITE_ROOK || sourcePiece == PIECE_BLACK_ROOK)
-  {
-    if(sourceSquare == A1) position->castle &= ~CASTLE_WHITE_QUEEN;
-
-    else if(sourceSquare == H1) position->castle &= ~CASTLE_WHITE_KING;
-
-    else if(sourceSquare == A8) position->castle &= ~CASTLE_BLACK_QUEEN;
-
-    else if(sourceSquare == H8) position->castle &= ~CASTLE_BLACK_KING;
-  }
-
-  if(sourcePiece == PIECE_WHITE_KING) position->castle &= ~CASTLE_WHITE;
-
-  else if(sourcePiece == PIECE_BLACK_KING) position->castle &= ~CASTLE_BLACK;
+  position->castle = source_square_castle_clear(position->castle, source_square, source_piece);
 }
 
 /*
@@ -165,7 +200,7 @@ static void move_pawn_passant_make(Position* position, Move move)
   Side passantSide = (side == SIDE_WHITE) ? SIDE_BLACK : SIDE_WHITE;
 
 
-  U64 moveBoard = ((1ULL << sourceSquare) ^ (1ULL << targetSquare));
+  U64 moveBoard = MOVE_BOARD_CREATE(sourceSquare, targetSquare);
 
 
 
@@ -196,7 +231,7 @@ static void move_pawn_double_make(Position* position, Move move)
   Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
 
 
-  U64 moveBoard = ((1ULL << sourceSquare) ^ (1ULL << targetSquare));
+  U64 moveBoard = MOVE_BOARD_CREATE(sourceSquare, targetSquare);
   
   // Move the pawn on the board
   position->boards[sourcePiece] ^= moveBoard;
@@ -226,7 +261,7 @@ static void move_pawn_promote_quiet_make(Position* position, Move move)
   Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
 
 
-  U64 moveBoard = ((1ULL << sourceSquare) ^ (1ULL << targetSquare));
+  U64 moveBoard = MOVE_BOARD_CREATE(sourceSquare, targetSquare);
 
 
   position->boards[promotePiece] |= (1ULL << targetSquare);
@@ -251,10 +286,10 @@ static void move_pawn_promote_capture_make(Position* position, Move move)
 
   Piece promotePiece = MOVE_PROMOTE_GET(move);
 
-  Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
+  Side side = PIECE_SIDE_GET(sourcePiece);
 
 
-  U64 moveBoard = ((1ULL << sourceSquare) ^ (1ULL << targetSquare));
+  U64 moveBoard = MOVE_BOARD_CREATE(sourceSquare, targetSquare);
 
   Piece capturePiece = square_piece_get(position->boards, targetSquare);
 
@@ -307,7 +342,7 @@ static void move_pawn_normal_quiet_make(Position* position, Move move)
   Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
 
 
-  U64 moveBoard = ((1ULL << sourceSquare) ^ (1ULL << targetSquare));
+  U64 moveBoard = MOVE_BOARD_CREATE(sourceSquare, targetSquare);
 
   position->boards[sourcePiece] ^= moveBoard;
 
@@ -327,10 +362,10 @@ static void move_pawn_normal_capture_make(Position* position, Move move)
 
   Piece sourcePiece = MOVE_PIECE_GET(move);
 
-  Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
+  Side side = PIECE_SIDE_GET(sourcePiece);
 
 
-  U64 moveBoard = ((1ULL << sourceSquare) ^ (1ULL << targetSquare));
+  U64 moveBoard = MOVE_BOARD_CREATE(sourceSquare, targetSquare);
 
   Piece capturePiece = square_piece_get(position->boards, targetSquare);
 
@@ -392,18 +427,19 @@ static void move_pawn_make(Position* position, Move move)
 }
 
 /*
+ * Make move in position
+ * excpected that the move is legal and valid
  *
+ * This function just executes, and does not validate
  */
 void move_make(Position* position, Move move)
 {
-  // This is the default for every move
   position->clock++;
-
   position->passant = SQUARE_NONE;
-
 
   Piece sourcePiece = MOVE_PIECE_GET(move);
 
+  // 2. Make more specific things based on type of move
   if(sourcePiece == PIECE_WHITE_PAWN || sourcePiece == PIECE_BLACK_PAWN)
   {
     move_pawn_make(position, move);
@@ -412,9 +448,17 @@ void move_make(Position* position, Move move)
   {
     move_castle_make(position, move);
   }
-  else move_normal_make(position, move);
+  else
+  {
+    move_normal_make(position, move);
+  }
 
-  // This is made for every move
+
+  Square target_square = MOVE_TARGET_GET(move);
+
+  position->castle = target_square_castle_clear(position->castle, target_square);
+
+
   if(position->side == SIDE_BLACK) position->turns++;
 
   position->side = (position->side == SIDE_WHITE) ? SIDE_BLACK : SIDE_WHITE;

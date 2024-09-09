@@ -20,12 +20,12 @@ extern const Move MOVE_MASK_DOUBLE;
 extern const Move MOVE_MASK_PASSANT;
 extern const Move MOVE_MASK_CASTLE;
 
-extern const Move MOVE_SHIFT_SOURCE;
-extern const Move MOVE_SHIFT_TARGET;
-extern const Move MOVE_SHIFT_PIECE;
-extern const Move MOVE_SHIFT_PROMOTE;
-
 extern const Move MOVE_NONE;
+
+#define MOVE_SHIFT_SOURCE  0
+#define MOVE_SHIFT_TARGET  6
+#define MOVE_SHIFT_PIECE   12
+#define MOVE_SHIFT_PROMOTE 16
 
 #define MOVE_SOURCE_GET(MOVE)   ((MOVE & MOVE_MASK_SOURCE)  >> MOVE_SHIFT_SOURCE)
 #define MOVE_TARGET_GET(MOVE)   ((MOVE & MOVE_MASK_TARGET)  >> MOVE_SHIFT_TARGET)

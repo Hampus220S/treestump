@@ -47,7 +47,15 @@ typedef enum
   SIDE_BOTH 
 } Side;
 
-typedef unsigned char Castle;
+typedef enum
+{
+  CASTLE_WHITE_KING  = 0b0001,
+  CASTLE_WHITE_QUEEN = 0b0010,
+  CASTLE_BLACK_KING  = 0b0100,
+  CASTLE_BLACK_QUEEN = 0b1000,
+  CASTLE_WHITE       = (CASTLE_WHITE_KING | CASTLE_WHITE_QUEEN),
+  CASTLE_BLACK       = (CASTLE_BLACK_KING | CASTLE_BLACK_QUEEN)
+} Castle;
 
 typedef struct
 {
