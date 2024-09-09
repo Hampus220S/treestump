@@ -38,18 +38,18 @@ extern void init_piece_lookup_masks(void);
 extern void init_bishop_rook_relevant_bits(void);
 
 
-extern U64 bishop_lookup_attacks(Square square, U64 cover);
+extern U64 bishop_lookup_attacks(Square square, Position position);
 
-extern U64 rook_lookup_attacks  (Square square, U64 cover);
+extern U64 rook_lookup_attacks  (Square square, Position position);
 
-extern U64 queen_lookup_attacks (Square square, U64 cover);
+extern U64 queen_lookup_attacks (Square square, Position position);
 
 extern U64 king_lookup_attacks  (Square square);
 
 extern U64 knight_lookup_attacks(Square square);
 
-extern U64 pawn_lookup_attacks  (Side side, Square square);
+extern U64 pawn_lookup_attacks  (Square square, Side side);
 
-extern U64 piece_lookup_attacks(Position position, Square square);
+extern U64 piece_lookup_attacks (Square square, Position position);
 
 #endif // PIECE_H

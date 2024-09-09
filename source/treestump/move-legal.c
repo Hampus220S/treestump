@@ -13,7 +13,7 @@
  */
 static bool square_is_attacked_by_queen(Position position, Square square, Side side)
 {
-  U64 attacks = queen_lookup_attacks(square, position.covers[SIDE_BOTH]);
+  U64 attacks = queen_lookup_attacks(square, position);
 
   U64 board = (side == SIDE_WHITE) ?
               position.boards[PIECE_WHITE_QUEEN] :
@@ -27,7 +27,7 @@ static bool square_is_attacked_by_queen(Position position, Square square, Side s
  */
 static bool square_is_attacked_by_bishop(Position position, Square square, Side side)
 {
-  U64 attacks = bishop_lookup_attacks(square, position.covers[SIDE_BOTH]);
+  U64 attacks = bishop_lookup_attacks(square, position);
 
   U64 board = (side == SIDE_WHITE) ?
               position.boards[PIECE_WHITE_BISHOP] :
@@ -41,7 +41,7 @@ static bool square_is_attacked_by_bishop(Position position, Square square, Side 
  */
 static bool square_is_attacked_by_rook(Position position, Square square, Side side)
 {
-  U64 attacks = rook_lookup_attacks(square, position.covers[SIDE_BOTH]);
+  U64 attacks = rook_lookup_attacks(square, position);
 
   U64 board = (side == SIDE_WHITE) ?
               position.boards[PIECE_WHITE_ROOK] :
@@ -56,8 +56,8 @@ static bool square_is_attacked_by_rook(Position position, Square square, Side si
 static bool square_is_attacked_by_pawn(Position position, Square square, Side side)
 {
   U64 attacks = (side == SIDE_WHITE) ?
-                pawn_lookup_attacks(SIDE_BLACK, square) :
-                pawn_lookup_attacks(SIDE_WHITE, square);
+                pawn_lookup_attacks(square, SIDE_BLACK) :
+                pawn_lookup_attacks(square, SIDE_WHITE);
 
   U64 board = (side == SIDE_WHITE) ?
               position.boards[PIECE_WHITE_PAWN] :
@@ -249,7 +249,7 @@ static bool move_pawn_capture_is_pseudo_legal(Position position, Move move)
 
   Side side = (sourceWhite ? SIDE_WHITE : SIDE_BLACK);
 
-  return (pawn_lookup_attacks(side, sourceSquare) & (1ULL << targetSquare));
+  return (pawn_lookup_attacks(sourceSquare, side) & (1ULL << targetSquare));
 }
 
 /*
@@ -469,7 +469,7 @@ static bool move_normal_is_pseudo_legal(Position position, Move move)
   if(BOARD_LOOKUP_LINES[sourceSquare][targetSquare] & position.covers[SIDE_BOTH]) return false;
 
   // The piece is able to move from sourceSquare to targetSquare
-  return (piece_lookup_attacks(position, sourceSquare) & (1ULL << targetSquare));
+  return (piece_lookup_attacks(sourceSquare, position) & (1ULL << targetSquare));
 }
 
 /*

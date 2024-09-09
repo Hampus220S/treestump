@@ -142,7 +142,7 @@ void create_white_normal_moves(MoveArray* moveArray, Position position, Square s
   if(piece == PIECE_WHITE_KING && sourceSquare == E1) create_white_castle_moves(moveArray, position);
 
   
-  U64 attackBoard = piece_lookup_attacks(position, sourceSquare);
+  U64 attackBoard = piece_lookup_attacks(sourceSquare, position);
 
   while(attackBoard)
   {
@@ -186,7 +186,7 @@ void create_black_normal_moves(MoveArray* moveArray, Position position, Square s
   if(piece == PIECE_BLACK_KING && sourceSquare == E8) create_black_castle_moves(moveArray, position);
   
 
-  U64 attackBoard = piece_lookup_attacks(position, sourceSquare);
+  U64 attackBoard = piece_lookup_attacks(sourceSquare, position);
 
   while(attackBoard)
   {

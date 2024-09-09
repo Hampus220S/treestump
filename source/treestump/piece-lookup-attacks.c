@@ -200,9 +200,9 @@ int rook_cover_index(Square square, U64 cover)
 /*
  *
  */
-U64 bishop_lookup_attacks(Square square, U64 cover)
+U64 bishop_lookup_attacks(Square square, Position position)
 {
-  int coverIndex = bishop_cover_index(square, cover);
+  int coverIndex = bishop_cover_index(square, position.covers[SIDE_BOTH]);
 
   return BISHOP_LOOKUP_ATTACKS[square][coverIndex];
 }
@@ -210,9 +210,9 @@ U64 bishop_lookup_attacks(Square square, U64 cover)
 /*
  *
  */
-U64 rook_lookup_attacks(Square square, U64 cover)
+U64 rook_lookup_attacks(Square square, Position position)
 {
-  int coverIndex = rook_cover_index(square, cover);
+  int coverIndex = rook_cover_index(square, position.covers[SIDE_BOTH]);
 
   return ROOK_LOOKUP_ATTACKS[square][coverIndex];
 }
@@ -220,13 +220,13 @@ U64 rook_lookup_attacks(Square square, U64 cover)
 /*
  *
  */
-U64 queen_lookup_attacks(Square square, U64 cover)
+U64 queen_lookup_attacks(Square square, Position position)
 {
   U64 queenAttacks = 0ULL;
 
-  queenAttacks |= bishop_lookup_attacks(square, cover);
+  queenAttacks |= bishop_lookup_attacks(square, position);
 
-  queenAttacks |= rook_lookup_attacks(square, cover);
+  queenAttacks |= rook_lookup_attacks(square, position);
 
   return queenAttacks;
 }
@@ -234,7 +234,7 @@ U64 queen_lookup_attacks(Square square, U64 cover)
 /*
  *
  */
-U64 pawn_lookup_attacks(Side side, Square square)
+U64 pawn_lookup_attacks(Square square, Side side)
 {
   return PAWN_LOOKUP_MASKS[side][square];
 }
@@ -256,41 +256,38 @@ U64 king_lookup_attacks(Square square)
 }
 
 /*
- * Change this to a switch case
+ * Lookup a board of attacks for a piece in position
+ *
+ * RETURN (U64 board)
  */
-U64 piece_lookup_attacks(Position position, Square square)
+U64 piece_lookup_attacks(Square square, Position position)
 {
-  Piece piece = boards_square_piece(position.boards, square);
+  switch(boards_square_piece(position.boards, square))
+  {
+    case PIECE_WHITE_KING: case PIECE_BLACK_KING:
+      return king_lookup_attacks(square);
 
-  // Change to switch case
+    case PIECE_WHITE_KNIGHT: case PIECE_BLACK_KNIGHT:
+      return knight_lookup_attacks(square);
 
-  if((piece == PIECE_WHITE_KING) || (piece == PIECE_BLACK_KING))
-  {
-    return king_lookup_attacks(square);
+    case PIECE_WHITE_BISHOP: case PIECE_BLACK_BISHOP:
+      return bishop_lookup_attacks(square, position);
+
+    case PIECE_WHITE_ROOK: case PIECE_BLACK_ROOK:
+      return rook_lookup_attacks(square, position);
+
+    case PIECE_WHITE_QUEEN: case PIECE_BLACK_QUEEN:
+      return queen_lookup_attacks(square, position);
+
+    case PIECE_WHITE_PAWN:
+      return pawn_lookup_attacks(square, SIDE_WHITE);
+
+    case PIECE_BLACK_PAWN:
+      return pawn_lookup_attacks(square, SIDE_BLACK);
+
+    default:
+      break;
   }
-  else if((piece == PIECE_WHITE_KNIGHT) || (piece == PIECE_BLACK_KNIGHT))
-  {
-    return knight_lookup_attacks(square);
-  }
-  else if((piece == PIECE_WHITE_BISHOP) || (piece == PIECE_BLACK_BISHOP))
-  {
-    return bishop_lookup_attacks(square, position.covers[SIDE_BOTH]);
-  }
-  else if((piece == PIECE_WHITE_ROOK) || (piece == PIECE_BLACK_ROOK))
-  {
-    return rook_lookup_attacks(square, position.covers[SIDE_BOTH]);
-  }
-  else if((piece == PIECE_WHITE_QUEEN) || (piece == PIECE_BLACK_QUEEN))
-  {
-    return queen_lookup_attacks(square, position.covers[SIDE_BOTH]);
-  }
-  else if(piece == PIECE_WHITE_PAWN)
-  {
-    return pawn_lookup_attacks(SIDE_WHITE, square);
-  }
-  else if(piece == PIECE_BLACK_PAWN)
-  {
-    return pawn_lookup_attacks(SIDE_BLACK, square);
-  }
-  else return 0ULL;
+
+  return 0ULL;
 }
