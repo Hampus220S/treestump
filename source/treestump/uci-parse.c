@@ -20,14 +20,10 @@ static MoveArray string_moves(U64 boards[12], const char movesString[])
 
   while(*movesString)
   {
-    Move parsedMove = string_move(movesString);
+    Move move = string_move_parse(boards, movesString);
 
-    // if(parsedMove == 0) break;
-
-    if(parsedMove != MOVE_NONE)
+    if(move != MOVE_NONE)
     {
-      Move move = complete_move(boards, parsedMove);
-
       moveArray.moves[moveArray.amount++] = move;
     }
 
@@ -35,6 +31,7 @@ static MoveArray string_moves(U64 boards[12], const char movesString[])
 
     movesString++;
   }
+
   return moveArray;
 }
 
@@ -158,11 +155,9 @@ static Position uci_position_parse(const char positionString[])
 
     while(*movesString)
     {
-      Move parsedMove = string_move(movesString);
+      Move move = string_move_parse(position.boards, movesString);
 
-      if(parsedMove == MOVE_NONE) break;
-
-      Move move = complete_move(position.boards, parsedMove);
+      if(move == MOVE_NONE) break;
 
       move_make(&position, move);
 

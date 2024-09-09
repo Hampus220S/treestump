@@ -17,9 +17,9 @@ extern Move best_move(Position position, int depth, int nodes, int movetime, Mov
 
 extern char* move_string(char* moveString, Move move);
 
-extern Move string_move(const char moveString[]);
+extern Move string_move_parse(U64 boards[12], const char* move_string);
 
-extern Move complete_move(U64 boards[12], Move move);
+extern Move move_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece promotePiece);
 
 extern bool square_is_attacked(Position position, Square square, Side side);
 

@@ -7,7 +7,7 @@ extern const char* SQUARE_STRINGS[BOARD_SQUARES];
 extern const char PIECE_SYMBOLS[12];
 
 
-Square string_square(const char squareString[])
+static Square string_square_parse(const char squareString[])
 {
   int file = squareString[0] - 'a';
   int rank = BOARD_RANKS - (squareString[1] - '0');
@@ -17,24 +17,24 @@ Square string_square(const char squareString[])
   return (rank * BOARD_FILES) + file;
 }
 
-Move string_move(const char moveString[])
+/*
+ *
+ */
+Move string_move_parse(U64 boards[12], const char* move_string)
 {
-  Move parseMove = 0;
+  Square sourceSquare = string_square_parse(move_string += 0);
 
-  Square sourceSquare = string_square(moveString += 0);
-  if(sourceSquare == SQUARE_NONE) return 0;
+  if(sourceSquare == SQUARE_NONE) return MOVE_NONE;
 
-  Square targetSquare = string_square(moveString += 2);
-  if(targetSquare == SQUARE_NONE) return 0;
+  Square targetSquare = string_square_parse(move_string += 2);
 
-  parseMove |= MOVE_SOURCE_SET(sourceSquare);
-  parseMove |= MOVE_TARGET_SET(targetSquare);
+  if(targetSquare == SQUARE_NONE) return MOVE_NONE;
 
-  Piece promotePiece = SYMBOL_PIECES[(unsigned char) *moveString];
 
-  if(promotePiece != PIECE_WHITE_PAWN) parseMove |= MOVE_PROMOTE_SET(promotePiece);
+  Piece promotePiece = SYMBOL_PIECES[(unsigned char) *move_string];
 
-  return parseMove;
+
+  return move_create(boards, sourceSquare, targetSquare, promotePiece);
 }
 
 char* move_string(char* moveString, Move move)
