@@ -1,7 +1,5 @@
 #include "../treestump.h"
 
-extern char* move_string(char* moveString, Move move);
-
 extern void create_moves(MoveArray* moveArray, Position position);
 
 extern int board_ls1b_index(U64 bitboard);
@@ -60,7 +58,7 @@ void perft_test(Position position, int depth)
 
     memset(moveString, 0, sizeof(moveString));
 
-    move_string(moveString, moveArray.moves[index]);
+    move_string_create(moveString, moveArray.moves[index]);
 
     printf("%s: %llu\n", moveString, moveNodes);
   }
@@ -167,12 +165,6 @@ Move best_move(Position position, int depth, int nodes, int movetime, MoveArray 
     move_make(&positionCopy, currentMove);
 
     int currentScore = -negamax(positionCopy, (depth - 1), nodes, -50000, +50000);
-
-    /*
-    char moveString[8];
-    move_string(moveString, currentMove);
-    printf("%s: %d\n", moveString, currentScore);
-    */
 
     if(currentScore > bestScore) 
     {

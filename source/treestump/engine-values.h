@@ -19,4 +19,8 @@ extern const Castle CASTLE_BLACK;
 
 extern const Piece SYMBOL_PIECES[];
 
+extern const char* SQUARE_STRINGS[BOARD_SQUARES];
+
+extern const char PIECE_SYMBOLS[12];
+
 #endif // ENGINE_VALUES_H

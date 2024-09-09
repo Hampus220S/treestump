@@ -116,7 +116,7 @@ extern const Move MOVE_NONE;
 
 
 #include "treestump/uci-parse.h"
-#include "treestump/string-handler.h"
+#include "treestump/string.h"
 #include "treestump/engine-values.h"
 #include "treestump/position.h"
 #include "treestump/move.h"

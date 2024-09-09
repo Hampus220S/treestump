@@ -128,7 +128,7 @@ static bool fen_boards_parse(U64 boards[12], const char string[])
 
   int stringLength = strlen(string);
 
-  if(!split_string_delim(stringArray, string, stringLength, "/", BOARD_RANKS)) return false;
+  if(!string_split_at_delim(stringArray, string, stringLength, "/", BOARD_RANKS)) return false;
 
   for(int rank = 0; rank < BOARD_RANKS; rank++)
   {
@@ -182,7 +182,7 @@ bool fen_parse(Position* position, const char fenString[])
 
   char stringArray[6][128];
 
-  if(!split_string_delim(stringArray, fenString, stringLength, " ", 6)) return false;
+  if(!string_split_at_delim(stringArray, fenString, stringLength, " ", 6)) return false;
 
 
   if(!fen_boards_parse(position->boards, stringArray[0])) return false;

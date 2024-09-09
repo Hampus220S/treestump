@@ -11,7 +11,7 @@ extern U64 searchedNodes;
 /*
  *
  */
-static MoveArray string_moves(U64 boards[12], const char movesString[])
+static MoveArray move_strings_parse(U64 boards[12], const char movesString[])
 {
   MoveArray moveArray;
 
@@ -20,7 +20,7 @@ static MoveArray string_moves(U64 boards[12], const char movesString[])
 
   while(*movesString)
   {
-    Move move = string_move_parse(boards, movesString);
+    Move move = move_string_parse(boards, movesString);
 
     if(move != MOVE_NONE)
     {
@@ -64,7 +64,7 @@ static void uci_go_parse(Position position, const char goString[])
   if((string = strstr(goString, "searchmoves")))
   {
     // Search only on these moves
-    searchmoves = string_moves(position.boards, goString + 12);
+    searchmoves = move_strings_parse(position.boards, goString + 12);
   }
   if(!strncmp(goString, "ponder", 5))
   {
@@ -124,7 +124,7 @@ static void uci_go_parse(Position position, const char goString[])
   Move bestMove = best_move(position, depth, nodes, movetime, searchmoves);
 
   char moveString[8];
-  move_string(moveString, bestMove);
+  move_string_create(moveString, bestMove);
 
   printf("bestmove %s\n", moveString);
 }
@@ -155,7 +155,7 @@ static Position uci_position_parse(const char positionString[])
 
     while(*movesString)
     {
-      Move move = string_move_parse(position.boards, movesString);
+      Move move = move_string_parse(position.boards, movesString);
 
       if(move == MOVE_NONE) break;
 

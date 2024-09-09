@@ -1,16 +1,12 @@
 #include "../treestump.h"
 
-extern const Piece SYMBOL_PIECES[];
-
-extern const char* SQUARE_STRINGS[BOARD_SQUARES];
-
-extern const char PIECE_SYMBOLS[12];
-
-
-static Square string_square_parse(const char squareString[])
+/*
+ * Parse a square string, ex e4, to a square object
+ */
+static Square square_string_parse(const char* string)
 {
-  int file = squareString[0] - 'a';
-  int rank = BOARD_RANKS - (squareString[1] - '0');
+  int file = string[0] - 'a';
+  int rank = BOARD_RANKS - (string[1] - '0');
 
   if(!(file >= 0 && file < BOARD_FILES) || !(rank >= 0 && rank < BOARD_RANKS)) return SQUARE_NONE;
 
@@ -18,40 +14,51 @@ static Square string_square_parse(const char squareString[])
 }
 
 /*
- *
+ * Parse a move string, ex e2e4, to a move object
  */
-Move string_move_parse(U64 boards[12], const char* move_string)
+Move move_string_parse(U64 boards[12], const char* string)
 {
-  Square sourceSquare = string_square_parse(move_string += 0);
+  Square sourceSquare = square_string_parse(string += 0);
 
   if(sourceSquare == SQUARE_NONE) return MOVE_NONE;
 
-  Square targetSquare = string_square_parse(move_string += 2);
+  Square targetSquare = square_string_parse(string += 2);
 
   if(targetSquare == SQUARE_NONE) return MOVE_NONE;
 
 
-  Piece promotePiece = SYMBOL_PIECES[(unsigned char) *move_string];
+  Piece promotePiece = SYMBOL_PIECES[(unsigned char) *string];
 
 
   return move_create(boards, sourceSquare, targetSquare, promotePiece);
 }
 
-char* move_string(char* moveString, Move move)
+/*
+ * Create a move string, ex e2e4, from a move object
+ */
+char* move_string_create(char* string, Move move)
 {
   const char* sourceString = SQUARE_STRINGS[MOVE_SOURCE_GET(move)];
   const char* targetString = SQUARE_STRINGS[MOVE_TARGET_GET(move)];
 
   Piece promotePiece = MOVE_PROMOTE_GET(move);
 
-  if(promotePiece == PIECE_WHITE_PAWN) sprintf(moveString, "%s%s", sourceString, targetString);
+  if(promotePiece == PIECE_WHITE_PAWN)
+  {
+    sprintf(string, "%s%s", sourceString, targetString);
+  }
+  else
+  {
+    sprintf(string, "%s%s%c", sourceString, targetString, PIECE_SYMBOLS[promotePiece]);
+  }
 
-  else sprintf(moveString, "%s%s%c", sourceString, targetString, PIECE_SYMBOLS[promotePiece]);
-
-  return moveString;
+  return string;
 }
 
-bool split_string_delim(char (*stringArray)[128], const char string[], int length, const char delim[], int amount)
+/*
+ * Split a string at deliminator into multiple smaller string parts
+ */
+bool string_split_at_delim(char (*stringArray)[128], const char string[], int length, const char delim[], int amount)
 {
   if(amount < 1) return false;
 
