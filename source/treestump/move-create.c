@@ -1,6 +1,10 @@
-#include "../treestump.h"
+/*
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-09
+ */
 
-extern Piece boards_square_piece(U64 boards[12], Square square);
+#include "../treestump.h"
 
 // Rename this
 bool ident_capture_move(U64 boards[12], Square targetSquare)

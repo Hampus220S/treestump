@@ -1,17 +1,14 @@
+/*
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-09
+ */
+
 #include "../treestump.h"
 
-extern const char PIECE_SYMBOLS[12];
-
-extern const char* SQUARE_STRINGS[BOARD_SQUARES];
-
-extern const Castle CASTLE_BLACK_QUEEN;
-extern const Castle CASTLE_BLACK_KING;
-extern const Castle CASTLE_WHITE_QUEEN;
-extern const Castle CASTLE_WHITE_KING;
-
-extern Piece boards_square_piece(U64 boards[12], Square square);
-
-
+/*
+ *
+ */
 void bitboard_print(U64 bitboard)
 {
   for(int rank = 0; rank < BOARD_RANKS; rank++)
@@ -31,6 +28,9 @@ void bitboard_print(U64 bitboard)
   printf("\nBitboard: %llu\n\n", bitboard);
 }
 
+/*
+ *
+ */
 void position_info_print(Position position)
 {
   printf("Side:      %s\n", (position.side == SIDE_WHITE) ? "white" : "black");
@@ -45,6 +45,9 @@ void position_info_print(Position position)
   );
 }
 
+/*
+ *
+ */
 void position_print(Position position)
 {
   for(int rank = 0; rank < BOARD_RANKS; rank++)
@@ -66,6 +69,9 @@ void position_print(Position position)
   position_info_print(position);
 }
 
+/*
+ *
+ */
 void board_covers_print(Position position)
 {
   for(int rank = 0; rank < BOARD_RANKS; rank++)

@@ -40,6 +40,26 @@ typedef enum
   SQUARE_NONE
 } Square;
 
+typedef enum 
+{
+  SIDE_WHITE, 
+  SIDE_BLACK, 
+  SIDE_BOTH 
+} Side;
+
+typedef unsigned char Castle;
+
+typedef struct
+{
+  U64     boards[12];
+  U64     covers[3];
+  Side    side;
+  Square  passant;
+  Castle  castle;
+  int     clock;
+  int     turns;
+} Position;
+
 #include "treestump/piece.h"
 #include "treestump/position.h"
 #include "treestump/move.h"

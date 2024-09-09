@@ -1,3 +1,9 @@
+/*
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-09
+ */
+
 #include "../treestump.h"
 
 const char* SQUARE_STRINGS[BOARD_SQUARES] = 
@@ -29,3 +35,6 @@ const Piece SYMBOL_PIECES[] =
   ['q'] = PIECE_BLACK_QUEEN,
   ['k'] = PIECE_BLACK_KING
 };
+
+const char* FEN_START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+

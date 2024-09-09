@@ -1,13 +1,12 @@
+/*
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-09
+ */
+
 #include "../treestump.h"
 
-extern void create_moves(MoveArray* moveArray, Position position);
-
-extern int board_ls1b_index(U64 bitboard);
-
-extern int position_score(Position position);
-
-extern void guess_order_moves(MoveArray* moveArray, Position position);
-
+#include "engine-intern.h"
 
 U64 perft_driver(Position position, int depth)
 {

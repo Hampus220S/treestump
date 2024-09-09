@@ -1,12 +1,10 @@
 /*
  * Written by Hampus Fridholm
  *
- * Last updated: 2024-09-08
+ * Last updated: 2024-09-09
  */
 
 #include "../treestump.h"
-
-extern U64 searchedNodes;
 
 /*
  *

@@ -1,24 +1,12 @@
+/*
+ * Check if move is legal in position
+ *
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-08
+ */
+
 #include "../treestump.h"
-
-extern U64 bishop_lookup_attacks(Square square, U64 cover);
-
-extern U64 rook_lookup_attacks(Square square, U64 cover);
-
-extern U64 queen_lookup_attacks(Square square, U64 cover);
-
-extern U64 pawn_lookup_attacks(Side side, Square square);
-
-extern U64 king_lookup_attacks(Square square);
-
-extern U64 knight_lookup_attacks(Square square);
-
-
-extern Piece boards_square_piece(U64 boards[12], Square square);
-
-extern U64 piece_lookup_attacks(Position position, Square square);
-
-extern int board_ls1b_index(U64 bitboard);
-
 
 /*
  *

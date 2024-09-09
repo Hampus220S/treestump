@@ -12,6 +12,10 @@
 * Create headers to prevent many extern statements at the top
 * use switch case instead of if statements
 * rename amount to move_count ex
+* extract square score from files intead of hard coded values
+
+* switch sqaure and side arguments in pawn_lookup_attacks
+- replace boards and cover with just position in lookup attack functions
 
 * refactore code in move_legal (make it more effective without repeating code validation)
 

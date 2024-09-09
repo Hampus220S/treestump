@@ -1,42 +1,19 @@
+/*
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-09
+ */
+
 #include "../treestump.h"
 
-extern U64 BISHOP_LOOKUP_MASKS[BOARD_SQUARES];
-
-extern U64 ROOK_LOOKUP_MASKS[BOARD_SQUARES];
-
-extern U64 PAWN_LOOKUP_MASKS[2][BOARD_SQUARES];
-
-extern U64 KNIGHT_LOOKUP_MASKS[BOARD_SQUARES];
-
-extern U64 KING_LOOKUP_MASKS[BOARD_SQUARES];
-
-
-extern int BISHOP_RELEVANT_BITS[BOARD_SQUARES];
-
-extern int ROOK_RELEVANT_BITS[BOARD_SQUARES];
-
-
-extern const U64 BISHOP_MAGIC_NUMBERS[64];
-
-extern const U64 ROOK_MAGIC_NUMBERS[64];
-
-
-extern U64 create_index_cover(int index, U64 attackMask, int bitAmount);
-
-extern U64 calculate_bishop_attacks(Square square, U64 block);
-
-extern U64 calculate_rook_attacks(Square square, U64 block);
-
-extern int board_ls1b_index(U64 bitboard);
-
-
-U64 BOARD_LOOKUP_LINES[BOARD_SQUARES][BOARD_SQUARES];
+#include "piece-intern.h"
 
 U64 BISHOP_LOOKUP_ATTACKS[BOARD_SQUARES][512];
-
 U64 ROOK_LOOKUP_ATTACKS[BOARD_SQUARES][4096];
 
-
+/*
+ *
+ */
 U64 create_index_cover(int index, U64 attackMask, int bitAmount)
 {
   U64 cover = 0ULL;
@@ -52,6 +29,9 @@ U64 create_index_cover(int index, U64 attackMask, int bitAmount)
   return cover;
 }
 
+/*
+ *
+ */
 U64 calculate_bishop_attacks(Square square, U64 block)
 {
   U64 attacks = 0ULL;
@@ -90,6 +70,9 @@ U64 calculate_bishop_attacks(Square square, U64 block)
   return attacks;
 }
 
+/*
+ *
+ */
 U64 calculate_rook_attacks(Square square, U64 block)
 {
   U64 attacks = 0ULL;
@@ -126,61 +109,6 @@ U64 calculate_rook_attacks(Square square, U64 block)
   }
 
   return attacks;
-}
-
-/*
- *
- */
-U64 create_board_line(Square source, Square target)
-{
-  U64 board = 0ULL;
-
-  int sourceRank = (source / BOARD_FILES);
-  int sourceFile = (source % BOARD_FILES);
-
-  int targetRank = (target / BOARD_FILES);
-  int targetFile = (target % BOARD_FILES);
-
-  int rankOffset = (targetRank - sourceRank);
-  int fileOffset = (targetFile - sourceFile);
-
-  int rankFactor = (rankOffset > 0) ? +1 : -1;
-  int fileFactor = (fileOffset > 0) ? +1 : -1;
-
-  int absRankOffset = (rankOffset * rankFactor);
-  int absFileOffset = (fileOffset * fileFactor);
-
-  // If the move is not diagonal nor straight, return empty board;
-  if(!(absRankOffset == absFileOffset) && !((absRankOffset == 0) ^ (absFileOffset == 0))) return 0ULL;
-
-  int rankScalor = (rankOffset == 0) ? 0 : rankFactor;
-  int fileScalor = (fileOffset == 0) ? 0 : fileFactor;
-
-  for(int rank = sourceRank, file = sourceFile; (rank != targetRank || file != targetFile); rank += rankScalor, file += fileScalor)
-  {
-    Square square = (rank * BOARD_FILES) + file;
-
-    if(square == source || square == target) continue;
-
-    board = BOARD_SQUARE_SET(board, square);
-  }
-  return board;
-}
-
-/*
- *
- */
-void init_board_lookup_lines(void)
-{
-  for(Square sourceSquare = A8; sourceSquare <= H1; sourceSquare++)
-  {
-    for(Square targetSquare = A8; targetSquare <= H1; targetSquare++)
-    {
-      U64 boardLines = create_board_line(sourceSquare, targetSquare);
-
-      BOARD_LOOKUP_LINES[sourceSquare][targetSquare] = boardLines;
-    }
-  }
 }
 
 /*
@@ -253,6 +181,9 @@ int bishop_cover_index(Square square, U64 cover)
   return (int) coverIndex;
 }
 
+/*
+ *
+ */
 int rook_cover_index(Square square, U64 cover)
 {
   U64 coverIndex = cover;
@@ -266,6 +197,9 @@ int rook_cover_index(Square square, U64 cover)
   return (int) coverIndex;
 }
 
+/*
+ *
+ */
 U64 bishop_lookup_attacks(Square square, U64 cover)
 {
   int coverIndex = bishop_cover_index(square, cover);
@@ -273,6 +207,9 @@ U64 bishop_lookup_attacks(Square square, U64 cover)
   return BISHOP_LOOKUP_ATTACKS[square][coverIndex];
 }
 
+/*
+ *
+ */
 U64 rook_lookup_attacks(Square square, U64 cover)
 {
   int coverIndex = rook_cover_index(square, cover);
@@ -280,6 +217,9 @@ U64 rook_lookup_attacks(Square square, U64 cover)
   return ROOK_LOOKUP_ATTACKS[square][coverIndex];
 }
 
+/*
+ *
+ */
 U64 queen_lookup_attacks(Square square, U64 cover)
 {
   U64 queenAttacks = 0ULL;
@@ -291,21 +231,33 @@ U64 queen_lookup_attacks(Square square, U64 cover)
   return queenAttacks;
 }
 
+/*
+ *
+ */
 U64 pawn_lookup_attacks(Side side, Square square)
 {
   return PAWN_LOOKUP_MASKS[side][square];
 }
 
+/*
+ *
+ */
 U64 knight_lookup_attacks(Square square)
 {
   return KNIGHT_LOOKUP_MASKS[square];
 }
 
+/*
+ *
+ */
 U64 king_lookup_attacks(Square square)
 {
   return KING_LOOKUP_MASKS[square];
 }
 
+/*
+ * Change this to a switch case
+ */
 U64 piece_lookup_attacks(Position position, Square square)
 {
   Piece piece = boards_square_piece(position.boards, square);

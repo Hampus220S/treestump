@@ -1,22 +1,16 @@
+/*
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-09
+ */
+
 #include "../treestump.h"
 
-extern Move create_double_move(Square sourceSquare, Square targetSquare, Piece piece);
+#include "engine-intern.h"
 
-extern Move create_promote_move(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece, Piece promotePiece);
-
-extern Move create_castle_move(Square sourceSquare, Square targetSquare, Piece piece);
-
-extern Move create_normal_move(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece);
-
-
-extern bool move_is_legal(Position position, Move move);
-
-extern U64 piece_lookup_attacks(Position position, Square square);
-
-
-extern int board_ls1b_index(U64 bitboard);
-
-
+/*
+ *
+ */
 void create_white_pawn_promote_moves(MoveArray* moveArray, Position position, Square sourceSquare)
 {
   for(Square targetSquare = (sourceSquare - 9); targetSquare <= (sourceSquare - 7); targetSquare++)
@@ -34,6 +28,9 @@ void create_white_pawn_promote_moves(MoveArray* moveArray, Position position, Sq
   }
 }
 
+/*
+ *
+ */
 void create_white_pawn_moves(MoveArray* moveArray, Position position, Square sourceSquare)
 {
   if(sourceSquare >= A7 && sourceSquare <= H7)
@@ -60,6 +57,9 @@ void create_white_pawn_moves(MoveArray* moveArray, Position position, Square sou
   }
 }
 
+/*
+ *
+ */
 void create_black_pawn_promote_moves(MoveArray* moveArray, Position position, Square sourceSquare)
 {
   for(Square targetSquare = (sourceSquare + 7); targetSquare <= (sourceSquare + 9); targetSquare++)
@@ -77,6 +77,9 @@ void create_black_pawn_promote_moves(MoveArray* moveArray, Position position, Sq
   }
 }
 
+/*
+ *
+ */
 void create_black_pawn_moves(MoveArray* moveArray, Position position, Square sourceSquare)
 {
   if(sourceSquare >= A2 && sourceSquare <= H2)
@@ -103,6 +106,9 @@ void create_black_pawn_moves(MoveArray* moveArray, Position position, Square sou
   }
 }
 
+/*
+ *
+ */
 void create_white_castle_moves(MoveArray* moveArray, Position position)
 {
   Move move = create_castle_move(E1, C1, PIECE_WHITE_KING);
@@ -114,6 +120,9 @@ void create_white_castle_moves(MoveArray* moveArray, Position position)
   if(move_is_legal(position, move)) moveArray->moves[moveArray->amount++] = move;
 }
 
+/*
+ *
+ */
 void create_black_castle_moves(MoveArray* moveArray, Position position)
 {
   Move move = create_castle_move(E8, C8, PIECE_BLACK_KING);
@@ -125,6 +134,9 @@ void create_black_castle_moves(MoveArray* moveArray, Position position)
   if(move_is_legal(position, move)) moveArray->moves[moveArray->amount++] = move;
 }
 
+/*
+ *
+ */
 void create_white_normal_moves(MoveArray* moveArray, Position position, Square sourceSquare, Piece piece)
 {
   if(piece == PIECE_WHITE_KING && sourceSquare == E1) create_white_castle_moves(moveArray, position);
@@ -144,6 +156,9 @@ void create_white_normal_moves(MoveArray* moveArray, Position position, Square s
   }
 }
 
+/*
+ *
+ */
 void create_white_moves(MoveArray* moveArray, Position position)
 {
   for(Piece piece = PIECE_WHITE_PAWN; piece <= PIECE_WHITE_KING; piece++)
@@ -163,6 +178,9 @@ void create_white_moves(MoveArray* moveArray, Position position)
   }
 }
 
+/*
+ *
+ */
 void create_black_normal_moves(MoveArray* moveArray, Position position, Square sourceSquare, Piece piece)
 {
   if(piece == PIECE_BLACK_KING && sourceSquare == E8) create_black_castle_moves(moveArray, position);
@@ -182,6 +200,9 @@ void create_black_normal_moves(MoveArray* moveArray, Position position, Square s
   }
 }
 
+/*
+ *
+ */
 void create_black_moves(MoveArray* moveArray, Position position)
 {
   for(Piece piece = PIECE_BLACK_PAWN; piece <= PIECE_BLACK_KING; piece++)
@@ -201,6 +222,9 @@ void create_black_moves(MoveArray* moveArray, Position position)
   }
 }
 
+/*
+ *
+ */
 void create_moves(MoveArray* moveArray, Position position)
 {
   if(position.side == SIDE_WHITE) create_white_moves(moveArray, position);

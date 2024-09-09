@@ -1,7 +1,12 @@
+/*
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-09
+ */
+
 #include "../treestump.h"
 
-extern int board_ls1b_index(U64 bitboard);
-
+#include "engine-intern.h"
 
 const int SQUARE_SCORES_PAWN[BOARD_SQUARES] = 
 {
@@ -77,6 +82,9 @@ const Square MIRROR_SQUARES[BOARD_SQUARES] =
 
 const int PIECE_SCORES[12] = {100, 300, 350, 500, 1000, 10000, -100, -300, -350, -500, -1000, -10000};
 
+/*
+ *
+ */
 int piece_square_score(Piece piece, Square square)
 {
   switch(piece)
@@ -99,6 +107,9 @@ int piece_square_score(Piece piece, Square square)
   }
 }
 
+/*
+ *
+ */
 int position_board_score(U64 boards[12])
 {
   int boardScore = 0;
@@ -123,6 +134,9 @@ int position_board_score(U64 boards[12])
   return boardScore;
 }
 
+/*
+ *
+ */
 int position_score(Position position)
 {
   int positionScore = 0;

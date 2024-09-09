@@ -1,6 +1,10 @@
-#include "../treestump.h"
+/*
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-09
+ */
 
-extern int board_ls1b_index(U64 bitboard);
+#include "../treestump.h"
 
 extern U64 random_U64(void);
 

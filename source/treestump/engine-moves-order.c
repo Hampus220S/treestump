@@ -1,10 +1,16 @@
+/*
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-09
+ */
+
 #include "../treestump.h"
 
-extern Piece boards_square_piece(U64 boards[12], Square square);
+#include "engine-intern.h"
 
-extern const int PIECE_SCORES[12];
-
-
+/*
+ *
+ */
 void qswap_moves(Move* moves, int index1, int index2)
 {
   Move tempMove = moves[index1];
@@ -12,6 +18,9 @@ void qswap_moves(Move* moves, int index1, int index2)
   moves[index2] = tempMove;
 }
 
+/*
+ *
+ */
 void qswap_scores(int* scores, int index1, int index2)
 {
   int tempScore = scores[index1];
@@ -19,6 +28,9 @@ void qswap_scores(int* scores, int index1, int index2)
   scores[index2] = tempScore;
 }
 
+/*
+ *
+ */
 void qswap_moves_scores(Move* moves, int* scores, int index1, int index2)
 {
   qswap_moves(moves, index1, index2);
@@ -26,6 +38,9 @@ void qswap_moves_scores(Move* moves, int* scores, int index1, int index2)
   qswap_scores(scores, index1, index2);
 }
 
+/*
+ *
+ */
 int partly_qsort_moves(Move* moves, int* scores, int index1, int index2)
 {
   int pivotScore = scores[index2];
@@ -43,6 +58,9 @@ int partly_qsort_moves(Move* moves, int* scores, int index1, int index2)
   return (iIndex + 1);
 }
 
+/*
+ *
+ */
 void qsort_moves_indexes(Move* moves, int* scores, int index1, int index2)
 {
   if(index1 >= index2) return;
@@ -54,11 +72,17 @@ void qsort_moves_indexes(Move* moves, int* scores, int index1, int index2)
   qsort_moves_indexes(moves, scores, (partIndex + 1), index2);
 }
 
+/*
+ *
+ */
 void qsort_moves_scores(MoveArray* moveArray, int* scores)
 {
   qsort_moves_indexes(moveArray->moves, scores, 0, (moveArray->amount - 1));
 }
 
+/*
+ *
+ */
 int guess_move_score(Position position, Move move)
 {
   int score = 0;
@@ -86,6 +110,9 @@ int guess_move_score(Position position, Move move)
   return (position.side == SIDE_WHITE) ? score : -score;
 }
 
+/*
+ *
+ */
 void guess_move_scores(int* scores, Position position, MoveArray moveArray)
 {
   for(int index = 0; index < moveArray.amount; index++)
@@ -94,6 +121,9 @@ void guess_move_scores(int* scores, Position position, MoveArray moveArray)
   }
 }
 
+/*
+ *
+ */
 void guess_order_moves(MoveArray* moveArray, Position position)
 {
   int scores[moveArray->amount];

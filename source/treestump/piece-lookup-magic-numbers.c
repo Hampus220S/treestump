@@ -1,29 +1,20 @@
+/*
+ * Written by Hampus Fridholm
+ *
+ * Last updated: 2024-09-09
+ */
+
 #include "../treestump.h"
 
-extern int board_bit_amount(U64 bitboard);
-
-extern U64 BISHOP_LOOKUP_MASKS[BOARD_SQUARES];
-
-extern U64 ROOK_LOOKUP_MASKS[BOARD_SQUARES];
-
-extern U64 create_index_cover(int index, U64 attackMask, int bitAmount);
-
-extern U64 calculate_bishop_attacks(Square square, U64 block);
-
-extern U64 calculate_rook_attacks(Square square, U64 block);
-
-extern int BISHOP_RELEVANT_BITS[BOARD_SQUARES];
-
-extern int ROOK_RELEVANT_BITS[BOARD_SQUARES];
+#include "piece-intern.h"
 
 extern U64 random_U64(void);
 
+#define MAGIC_NUMBER_CREATE() (random_U64() & random_U64() & random_U64())
 
-U64 generate_magic_number(void)
-{
-  return random_U64() & random_U64() & random_U64();
-}
-
+/*
+ *
+ */
 U64 generate_covers_magic_number(U64 covers[4096], int relevantBits, U64 attacks[4096], U64 attackMask)
 {
   U64 usedAttacks[4096];
@@ -32,7 +23,7 @@ U64 generate_covers_magic_number(U64 covers[4096], int relevantBits, U64 attacks
 
   for (int count = 0; count < 100000000; count++)
   {
-    U64 magicNumber = generate_magic_number();
+    U64 magicNumber = MAGIC_NUMBER_CREATE();
 
     if (board_bit_amount((attackMask * magicNumber) & 0xFF00000000000000) < 6) continue;
 
