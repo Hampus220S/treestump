@@ -33,10 +33,10 @@ Move create_double_move(Square sourceSquare, Square targetSquare, Piece piece)
 {
   Move move = MOVE_NONE;
 
-  move |= MOVE_SET_SOURCE(sourceSquare);
-  move |= MOVE_SET_TARGET(targetSquare);
+  move |= MOVE_SOURCE_SET(sourceSquare);
+  move |= MOVE_TARGET_SET(targetSquare);
 
-  move |= MOVE_SET_PIECE(piece);
+  move |= MOVE_PIECE_SET(piece);
 
   move |= MOVE_MASK_DOUBLE;
 
@@ -47,12 +47,12 @@ Move create_promote_move(U64 boards[12], Square sourceSquare, Square targetSquar
 {
   Move move = MOVE_NONE;
 
-  move |= MOVE_SET_SOURCE(sourceSquare);
-  move |= MOVE_SET_TARGET(targetSquare);
+  move |= MOVE_SOURCE_SET(sourceSquare);
+  move |= MOVE_TARGET_SET(targetSquare);
 
-  move |= MOVE_SET_PIECE(piece);
+  move |= MOVE_PIECE_SET(piece);
 
-  move |= MOVE_SET_PROMOTE(promotePiece);
+  move |= MOVE_PROMOTE_SET(promotePiece);
 
   if(ident_capture_move(boards, targetSquare)) move |= MOVE_MASK_CAPTURE;
 
@@ -63,10 +63,10 @@ Move create_castle_move(Square sourceSquare, Square targetSquare, Piece piece)
 {
   Move move = MOVE_NONE;
 
-  move |= MOVE_SET_SOURCE(sourceSquare);
-  move |= MOVE_SET_TARGET(targetSquare);
+  move |= MOVE_SOURCE_SET(sourceSquare);
+  move |= MOVE_TARGET_SET(targetSquare);
 
-  move |= MOVE_SET_PIECE(piece);
+  move |= MOVE_PIECE_SET(piece);
 
   move |= MOVE_MASK_CASTLE;
 
@@ -77,10 +77,10 @@ Move create_normal_move(U64 boards[12], Square sourceSquare, Square targetSquare
 {
   Move move = MOVE_NONE;
 
-  move |= MOVE_SET_SOURCE(sourceSquare);
-  move |= MOVE_SET_TARGET(targetSquare);
+  move |= MOVE_SOURCE_SET(sourceSquare);
+  move |= MOVE_TARGET_SET(targetSquare);
 
-  move |= MOVE_SET_PIECE(piece);
+  move |= MOVE_PIECE_SET(piece);
 
   if(ident_capture_move(boards, targetSquare)) move |= MOVE_MASK_CAPTURE;
 
@@ -92,18 +92,18 @@ Move create_move(U64 boards[12], Square sourceSquare, Square targetSquare)
 {
   Move move = MOVE_NONE;
 
-  move |= MOVE_SET_SOURCE(sourceSquare);
-  move |= MOVE_SET_TARGET(targetSquare);
+  move |= MOVE_SOURCE_SET(sourceSquare);
+  move |= MOVE_TARGET_SET(targetSquare);
 
 
   Piece sourcePiece = boards_square_piece(boards, sourceSquare);
 
-  move |= MOVE_SET_PIECE(sourcePiece);
+  move |= MOVE_PIECE_SET(sourcePiece);
 
 
   if(sourcePiece == PIECE_WHITE_PAWN)
   {
-    if(targetSquare >= A8 && targetSquare <= H8) move |= MOVE_SET_PROMOTE(PIECE_WHITE_QUEEN);
+    if(targetSquare >= A8 && targetSquare <= H8) move |= MOVE_PROMOTE_SET(PIECE_WHITE_QUEEN);
 
     if((sourceSquare - targetSquare) == (BOARD_FILES * 2)) move |= MOVE_MASK_DOUBLE;
 
@@ -111,7 +111,7 @@ Move create_move(U64 boards[12], Square sourceSquare, Square targetSquare)
   }
   else if(sourcePiece == PIECE_BLACK_PAWN)
   {
-    if(targetSquare >= A1 && targetSquare <= H1) move |= MOVE_SET_PROMOTE(PIECE_WHITE_QUEEN);
+    if(targetSquare >= A1 && targetSquare <= H1) move |= MOVE_PROMOTE_SET(PIECE_WHITE_QUEEN);
 
     if((targetSquare - sourceSquare) == (BOARD_FILES * 2)) move |= MOVE_MASK_DOUBLE;
 
@@ -131,8 +131,8 @@ Move create_move(U64 boards[12], Square sourceSquare, Square targetSquare)
 
 Move complete_move(U64 boards[12], Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
   return create_move(boards, sourceSquare, targetSquare);
 }

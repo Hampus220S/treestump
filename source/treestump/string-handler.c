@@ -27,22 +27,22 @@ Move string_move(const char moveString[])
   Square targetSquare = string_square(moveString += 2);
   if(targetSquare == SQUARE_NONE) return 0;
 
-  parseMove |= MOVE_SET_SOURCE(sourceSquare);
-  parseMove |= MOVE_SET_TARGET(targetSquare);
+  parseMove |= MOVE_SOURCE_SET(sourceSquare);
+  parseMove |= MOVE_TARGET_SET(targetSquare);
 
   Piece promotePiece = SYMBOL_PIECES[(unsigned char) *moveString];
 
-  if(promotePiece != PIECE_WHITE_PAWN) parseMove |= MOVE_SET_PROMOTE(promotePiece);
+  if(promotePiece != PIECE_WHITE_PAWN) parseMove |= MOVE_PROMOTE_SET(promotePiece);
 
   return parseMove;
 }
 
 char* move_string(char* moveString, Move move)
 {
-  const char* sourceString = SQUARE_STRINGS[MOVE_GET_SOURCE(move)];
-  const char* targetString = SQUARE_STRINGS[MOVE_GET_TARGET(move)];
+  const char* sourceString = SQUARE_STRINGS[MOVE_SOURCE_GET(move)];
+  const char* targetString = SQUARE_STRINGS[MOVE_TARGET_GET(move)];
 
-  Piece promotePiece = MOVE_GET_PROMOTE(move);
+  Piece promotePiece = MOVE_PROMOTE_GET(move);
 
   if(promotePiece == PIECE_WHITE_PAWN) sprintf(moveString, "%s%s", sourceString, targetString);
 

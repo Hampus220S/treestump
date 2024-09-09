@@ -13,10 +13,10 @@
  */
 static void move_castle_make(Position* position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
   Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
 
@@ -53,10 +53,10 @@ static void move_castle_make(Position* position, Move move)
  */
 static void move_normal_quiet_make(Position* position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
   Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
 
@@ -79,10 +79,10 @@ static void move_normal_quiet_make(Position* position, Move move)
  */
 static void move_normal_capture_make(Position* position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
   Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
 
@@ -124,8 +124,8 @@ static void move_normal_make(Position* position, Move move)
   else move_normal_quiet_make(position, move);
 
   // This is made for both normal moves
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Piece  sourcePiece  = MOVE_PIECE_GET(move);
 
   // Fix: Clear the castling rights if the rook gets captures as well!
   if(sourcePiece == PIECE_WHITE_ROOK || sourcePiece == PIECE_BLACK_ROOK)
@@ -149,10 +149,10 @@ static void move_normal_make(Position* position, Move move)
  */
 static void move_pawn_passant_make(Position* position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
   Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
 
@@ -188,10 +188,10 @@ static void move_pawn_passant_make(Position* position, Move move)
  */
 static void move_pawn_double_make(Position* position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
   Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
 
@@ -216,12 +216,12 @@ static void move_pawn_double_make(Position* position, Move move)
  */
 static void move_pawn_promote_quiet_make(Position* position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
-  Piece promotePiece = MOVE_GET_PROMOTE(move);
+  Piece promotePiece = MOVE_PROMOTE_GET(move);
 
   Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
 
@@ -244,12 +244,12 @@ static void move_pawn_promote_quiet_make(Position* position, Move move)
  */
 static void move_pawn_promote_capture_make(Position* position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
-  Piece promotePiece = MOVE_GET_PROMOTE(move);
+  Piece promotePiece = MOVE_PROMOTE_GET(move);
 
   Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
 
@@ -299,10 +299,10 @@ static void move_pawn_promote_make(Position* position, Move move)
  */
 static void move_pawn_normal_quiet_make(Position* position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
   Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
 
@@ -322,10 +322,10 @@ static void move_pawn_normal_quiet_make(Position* position, Move move)
  */
 static void move_pawn_normal_capture_make(Position* position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
   Side side = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK;
 
@@ -402,7 +402,7 @@ void move_make(Position* position, Move move)
   position->passant = SQUARE_NONE;
 
 
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
   if(sourcePiece == PIECE_WHITE_PAWN || sourcePiece == PIECE_BLACK_PAWN)
   {

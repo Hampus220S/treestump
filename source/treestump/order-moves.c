@@ -63,12 +63,12 @@ int guess_move_score(Position position, Move move)
 {
   int score = 0;
 
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
   Piece targetPiece = boards_square_piece(position.boards, targetSquare);
 
   if(targetPiece != PIECE_NONE)
   {
-    Piece sourcePiece = MOVE_GET_PIECE(move);
+    Piece sourcePiece = MOVE_PIECE_GET(move);
 
     int sourcePieceScore = PIECE_SCORES[sourcePiece];
     int targetPieceScore = PIECE_SCORES[targetPiece];
@@ -76,7 +76,7 @@ int guess_move_score(Position position, Move move)
     score += ((10 * sourcePieceScore) - targetPieceScore);
   }
 
-  Piece promotePiece = MOVE_GET_PROMOTE(move);
+  Piece promotePiece = MOVE_PROMOTE_GET(move);
 
   if(promotePiece != PIECE_WHITE_PAWN)
   {

@@ -126,8 +126,8 @@ bool square_is_attacked(Position position, Square square, Side side)
  */
 static bool move_pawn_double_white_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
   if(!(sourceSquare >= A2 && sourceSquare <= H2)) return false;
 
@@ -145,8 +145,8 @@ static bool move_pawn_double_white_is_pseudo_legal(Position position, Move move)
  */
 static bool move_pawn_double_black_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
   if(!(sourceSquare >= A7 && sourceSquare <= H7)) return false;
 
@@ -164,7 +164,7 @@ static bool move_pawn_double_black_is_pseudo_legal(Position position, Move move)
  */
 static bool move_pawn_double_is_pseudo_legal(Position position, Move move)
 {
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
   if(sourcePiece == PIECE_WHITE_PAWN)
   {
@@ -182,8 +182,8 @@ static bool move_pawn_double_is_pseudo_legal(Position position, Move move)
  */
 static bool move_pawn_passant_white_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
   if(!((sourceSquare >= A5) && (sourceSquare <= H5))) return false;
 
@@ -206,8 +206,8 @@ static bool move_pawn_passant_white_is_pseudo_legal(Position position, Move move
  */
 static bool move_pawn_passant_black_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
   int squareDiff = (targetSquare - sourceSquare);
 
@@ -229,7 +229,7 @@ static bool move_pawn_passant_black_is_pseudo_legal(Position position, Move move
  */
 static bool move_pawn_passant_is_pseudo_legal(Position position, Move move)
 {
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
   if(sourcePiece == PIECE_WHITE_PAWN)
   {
@@ -247,8 +247,8 @@ static bool move_pawn_passant_is_pseudo_legal(Position position, Move move)
  */
 static bool move_pawn_capture_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
 
   if(!((1ULL << targetSquare) & position.covers[SIDE_BOTH])) return false;
@@ -269,10 +269,10 @@ static bool move_pawn_capture_is_pseudo_legal(Position position, Move move)
  */
 static bool move_pawn_normal_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
   if((1ULL << targetSquare) & position.covers[SIDE_BOTH]) return false;
 
@@ -358,8 +358,8 @@ static bool move_castle_white_queen_is_pseudo_legal(Position position)
  */
 static bool move_castle_white_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
   if(sourceSquare != E1) return false;
 
@@ -419,8 +419,8 @@ static bool move_castle_black_queen_is_pseudo_legal(Position position)
  */
 static bool move_castle_black_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
   if(sourceSquare != E8) return false;
 
@@ -440,7 +440,7 @@ static bool move_castle_black_is_pseudo_legal(Position position, Move move)
  */
 static bool move_castle_is_pseudo_legal(Position position, Move move)
 {
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
   if(sourcePiece == PIECE_WHITE_KING)
   {
@@ -458,10 +458,10 @@ static bool move_castle_is_pseudo_legal(Position position, Move move)
  */
 static bool move_normal_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_GET_SOURCE(move);
-  Square targetSquare = MOVE_GET_TARGET(move);
+  Square sourceSquare = MOVE_SOURCE_GET(move);
+  Square targetSquare = MOVE_TARGET_GET(move);
 
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
   // If the moving piece does not exists on the source square
   if(!BOARD_SQUARE_GET(position.boards[sourcePiece], sourceSquare)) return false;
@@ -489,7 +489,7 @@ static bool move_normal_is_pseudo_legal(Position position, Move move)
  */
 static bool move_is_pseudo_legal(Position position, Move move)
 {
-  Piece sourcePiece = MOVE_GET_PIECE(move);
+  Piece sourcePiece = MOVE_PIECE_GET(move);
 
   if((sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) && position.side != SIDE_WHITE) return false;
   if((sourcePiece >= PIECE_BLACK_PAWN && sourcePiece <= PIECE_BLACK_KING) && position.side != SIDE_BLACK) return false;

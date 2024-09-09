@@ -27,7 +27,7 @@ void create_white_pawn_promote_moves(MoveArray* moveArray, Position position, Sq
 
     for(Piece promotePiece = PIECE_WHITE_KNIGHT; promotePiece <= PIECE_WHITE_QUEEN; promotePiece++)
     {
-      move = (move & ~MOVE_MASK_PROMOTE) | MOVE_SET_PROMOTE(promotePiece);
+      move = (move & ~MOVE_MASK_PROMOTE) | MOVE_PROMOTE_SET(promotePiece);
 
       moveArray->moves[moveArray->amount++] = move;
     }
@@ -70,7 +70,7 @@ void create_black_pawn_promote_moves(MoveArray* moveArray, Position position, Sq
 
     for(Piece promotePiece = PIECE_BLACK_KNIGHT; promotePiece <= PIECE_BLACK_QUEEN; promotePiece++)
     {
-      move = (move & ~MOVE_MASK_PROMOTE) | MOVE_SET_PROMOTE(promotePiece);
+      move = (move & ~MOVE_MASK_PROMOTE) | MOVE_PROMOTE_SET(promotePiece);
 
       moveArray->moves[moveArray->amount++] = move;
     }
