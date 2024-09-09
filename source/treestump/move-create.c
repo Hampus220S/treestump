@@ -9,7 +9,7 @@
 // Rename this
 bool ident_capture_move(U64 boards[12], Square targetSquare)
 {
-  Piece targetPiece = boards_square_piece(boards, targetSquare);
+  Piece targetPiece = square_piece_get(boards, targetSquare);
 
   return (targetPiece != PIECE_NONE);
 }
@@ -17,8 +17,8 @@ bool ident_capture_move(U64 boards[12], Square targetSquare)
 // Rename this, and rewrite to be as simple as possible
 bool ident_passant_move(U64 boards[12], Piece sourcePiece, Square sourceSquare, Square targetSquare)
 {
-  // Change this function, boards_square_piece should not be used
-  Piece targetPiece = boards_square_piece(boards, targetSquare);
+  // Change this function, square_piece_get should not be used
+  Piece targetPiece = square_piece_get(boards, targetSquare);
 
   if(targetPiece != PIECE_NONE) return false;
 
@@ -182,7 +182,7 @@ Move move_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece
 {
   Move move = MOVE_NONE;
 
-  Piece sourcePiece = boards_square_piece(boards, sourceSquare);
+  Piece sourcePiece = square_piece_get(boards, sourceSquare);
 
   move |= MOVE_SOURCE_SET(sourceSquare);
   move |= MOVE_TARGET_SET(targetSquare);

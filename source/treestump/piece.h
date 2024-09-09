@@ -27,7 +27,7 @@ typedef enum
 } Piece;
 
 // Remove extern from this, and create getter like for attacks
-extern U64 BOARD_LOOKUP_LINES[BOARD_SQUARES][BOARD_SQUARES];
+extern U64 BOARD_LINES[BOARD_SQUARES][BOARD_SQUARES];
 
 extern void attacks_init(void);
 

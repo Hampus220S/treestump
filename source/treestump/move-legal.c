@@ -353,7 +353,7 @@ static bool move_normal_is_pseudo_legal(Position position, Move move)
   // If the moving piece does not exists on the source square
   if(!BOARD_SQUARE_GET(position.boards[sourcePiece], sourceSquare)) return false;
 
-  Piece targetPiece = boards_square_piece(position.boards, targetSquare);
+  Piece targetPiece = square_piece_get(position.boards, targetSquare);
 
   // If the capture flag and the target piece doesn't match each other
   if(((move & MOVE_MASK_CAPTURE) ? 1 : 0) ^ (targetPiece != PIECE_NONE)) return false;
@@ -365,7 +365,7 @@ static bool move_normal_is_pseudo_legal(Position position, Move move)
   if((move & MOVE_MASK_CAPTURE) && !(sourceWhite ^ targetWhite)) return false;
 
   // If there are any pieces between source and target square
-  if(BOARD_LOOKUP_LINES[sourceSquare][targetSquare] & position.covers[SIDE_BOTH]) return false;
+  if(BOARD_LINES[sourceSquare][targetSquare] & position.covers[SIDE_BOTH]) return false;
 
   // The piece is able to move from sourceSquare to targetSquare
   return (attacks_get(sourceSquare, position) & (1ULL << targetSquare));

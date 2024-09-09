@@ -58,7 +58,7 @@ void position_print(Position position)
 
       if(!file) printf("%d ", BOARD_RANKS - rank);
 
-      int piece = boards_square_piece(position.boards, square);
+      int piece = square_piece_get(position.boards, square);
 
       printf("%c ", (piece != PIECE_NONE) ? PIECE_SYMBOLS[piece] : '.');
     }
@@ -82,7 +82,7 @@ void board_covers_print(Position position)
 
       if(!file) printf("%d ", BOARD_RANKS - rank);
 
-      int piece = boards_square_piece(position.boards, square);
+      int piece = square_piece_get(position.boards, square);
 
       printf("%c ", (piece != PIECE_NONE) ? PIECE_SYMBOLS[piece] : '.');
     }

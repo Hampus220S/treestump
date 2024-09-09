@@ -6,46 +6,61 @@
 
 #include "../treestump.h"
 
-U64 BOARD_LOOKUP_LINES[BOARD_SQUARES][BOARD_SQUARES];
+U64 BOARD_LINES[BOARD_SQUARES][BOARD_SQUARES];
+
+/*
+ * This function determines if the line is either diagonal or straight,
+ * based on rank and file offset
+ *
+ * RETURN (bool result)
+ * - true  | The line is either  diagonal or  straight
+ * - false | The line is neither diagonal nor straight
+ */
+static bool line_is_diagonal_or_straight(int rank_offset, int file_offset)
+{
+  int abs_rank_offset = abs(rank_offset);
+  int abs_file_offset = abs(file_offset);
+
+  bool diagonal = (abs_rank_offset == abs_file_offset);
+  bool straight = ((abs_rank_offset == 0) ^ (abs_file_offset == 0));
+
+  return (diagonal || straight);
+}
 
 /*
  * Create a U64 board with a line between source and target
  *
  * RETURN (U64 board)
  */
-static U64 create_board_line(Square source, Square target)
+static U64 board_line_create(Square source, Square target)
 {
   U64 board = 0ULL;
 
-  int sourceRank = (source / BOARD_FILES);
-  int sourceFile = (source % BOARD_FILES);
+  int source_rank = (source / BOARD_FILES);
+  int source_file = (source % BOARD_FILES);
 
-  int targetRank = (target / BOARD_FILES);
-  int targetFile = (target % BOARD_FILES);
+  int target_rank = (target / BOARD_FILES);
+  int target_file = (target % BOARD_FILES);
 
-  int rankOffset = (targetRank - sourceRank);
-  int fileOffset = (targetFile - sourceFile);
+  int rank_offset = (target_rank - source_rank);
+  int file_offset = (target_file - source_file);
 
-  int rankFactor = (rankOffset > 0) ? +1 : -1;
-  int fileFactor = (fileOffset > 0) ? +1 : -1;
+  if(!line_is_diagonal_or_straight(rank_offset, file_offset)) return 0ULL;
 
-  int absRankOffset = (rankOffset * rankFactor);
-  int absFileOffset = (fileOffset * fileFactor);
+  // This one-liner determies the sign of a number! :D
+  int rank_scalor = (rank_offset > 0) - (rank_offset < 0);
+  int file_scalor = (file_offset > 0) - (file_offset < 0);
 
-  // If the move is not diagonal nor straight, return empty board;
-  if(!(absRankOffset == absFileOffset) && !((absRankOffset == 0) ^ (absFileOffset == 0))) return 0ULL;
-
-  int rankScalor = (rankOffset == 0) ? 0 : rankFactor;
-  int fileScalor = (fileOffset == 0) ? 0 : fileFactor;
-
-  for(int rank = sourceRank, file = sourceFile; (rank != targetRank || file != targetFile); rank += rankScalor, file += fileScalor)
+  for(int rank = source_rank + rank_scalor,
+          file = source_file + file_scalor;
+      (rank != target_rank || file != target_file);
+      rank += rank_scalor, file += file_scalor)
   {
     Square square = (rank * BOARD_FILES) + file;
 
-    if(square == source || square == target) continue;
-
     board = BOARD_SQUARE_SET(board, square);
   }
+
   return board;
 }
 
@@ -59,9 +74,9 @@ void board_lines_init(void)
   {
     for(Square targetSquare = A8; targetSquare <= H1; targetSquare++)
     {
-      U64 boardLines = create_board_line(sourceSquare, targetSquare);
+      U64 board_line = board_line_create(sourceSquare, targetSquare);
 
-      BOARD_LOOKUP_LINES[sourceSquare][targetSquare] = boardLines;
+      BOARD_LINES[sourceSquare][targetSquare] = board_line;
     }
   }
 }
@@ -71,15 +86,14 @@ void board_lines_init(void)
  */
 int board_bit_amount(U64 bitboard)
 {
-  int count = 0;
+  int amount;
 
-  while(bitboard)
+  for(amount = 0; bitboard; amount++)
   {
-    count++;
     bitboard &= bitboard - 1;
   }
 
-  return count;
+  return amount;
 }
 
 int board_ls1b_index(U64 bitboard)
@@ -92,7 +106,7 @@ int board_ls1b_index(U64 bitboard)
 /*
  * Get the piece that is on the specified square
  */
-Piece boards_square_piece(U64 boards[12], Square square)
+Piece square_piece_get(U64 boards[12], Square square)
 {
   for(Piece piece = PIECE_WHITE_PAWN; piece <= PIECE_BLACK_KING; piece++)
   {

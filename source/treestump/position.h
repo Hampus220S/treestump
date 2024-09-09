@@ -27,7 +27,7 @@ extern int board_ls1b_index(U64 bitboard);
 
 extern void position_print(Position position);
 
-extern Piece boards_square_piece(U64 boards[12], Square square);
+extern Piece square_piece_get(U64 boards[12], Square square);
 
 
 extern bool square_is_attacked(Position position, Square square, Side side);

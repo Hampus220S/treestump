@@ -89,7 +89,7 @@ static void move_normal_capture_make(Position* position, Move move)
 
   U64 moveBoard = ((1ULL << sourceSquare) ^ (1ULL << targetSquare));
 
-  Piece capturePiece = boards_square_piece(position->boards, targetSquare);
+  Piece capturePiece = square_piece_get(position->boards, targetSquare);
 
 
   position->boards[sourcePiece] ^= moveBoard;
@@ -256,7 +256,7 @@ static void move_pawn_promote_capture_make(Position* position, Move move)
 
   U64 moveBoard = ((1ULL << sourceSquare) ^ (1ULL << targetSquare));
 
-  Piece capturePiece = boards_square_piece(position->boards, targetSquare);
+  Piece capturePiece = square_piece_get(position->boards, targetSquare);
 
 
   position->boards[promotePiece] |= (1ULL << targetSquare);
@@ -332,7 +332,7 @@ static void move_pawn_normal_capture_make(Position* position, Move move)
 
   U64 moveBoard = ((1ULL << sourceSquare) ^ (1ULL << targetSquare));
 
-  Piece capturePiece = boards_square_piece(position->boards, targetSquare);
+  Piece capturePiece = square_piece_get(position->boards, targetSquare);
 
 
   position->boards[sourcePiece] ^= moveBoard;

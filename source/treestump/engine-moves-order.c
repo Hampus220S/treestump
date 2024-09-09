@@ -89,7 +89,7 @@ static int move_score_guess(Position position, Move move)
   int score = 0;
 
   Square targetSquare = MOVE_TARGET_GET(move);
-  Piece targetPiece = boards_square_piece(position.boards, targetSquare);
+  Piece targetPiece = square_piece_get(position.boards, targetSquare);
 
   if(targetPiece != PIECE_NONE)
   {

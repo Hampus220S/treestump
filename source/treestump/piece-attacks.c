@@ -266,7 +266,7 @@ U64 attacks_king_get(Square square)
  */
 U64 attacks_get(Square square, Position position)
 {
-  switch(boards_square_piece(position.boards, square))
+  switch(square_piece_get(position.boards, square))
   {
     case PIECE_WHITE_KING: case PIECE_BLACK_KING:
       return attacks_king_get(square);
