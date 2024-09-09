@@ -35,7 +35,7 @@ bool ident_passant_move(U64 boards[12], Piece sourcePiece, Square sourceSquare, 
   return false;
 }
 
-Move create_double_move(Square sourceSquare, Square targetSquare, Piece piece)
+Move move_double_create(Square sourceSquare, Square targetSquare, Piece piece)
 {
   Move move = MOVE_NONE;
 
@@ -49,7 +49,7 @@ Move create_double_move(Square sourceSquare, Square targetSquare, Piece piece)
   return move;
 }
 
-Move create_promote_move(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece, Piece promotePiece)
+Move move_promote_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece, Piece promotePiece)
 {
   Move move = MOVE_NONE;
 
@@ -65,7 +65,7 @@ Move create_promote_move(U64 boards[12], Square sourceSquare, Square targetSquar
   return move;
 }
 
-Move create_castle_move(Square sourceSquare, Square targetSquare, Piece piece)
+Move move_castle_create(Square sourceSquare, Square targetSquare, Piece piece)
 {
   Move move = MOVE_NONE;
 
@@ -79,7 +79,7 @@ Move create_castle_move(Square sourceSquare, Square targetSquare, Piece piece)
   return move;
 }
 
-Move create_normal_move(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece)
+Move move_normal_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece)
 {
   Move move = MOVE_NONE;
 
@@ -135,9 +135,14 @@ static Move move_flag_create(U64 boards[12], Piece sourcePiece, Square sourceSqu
 }
 
 /*
+ * Create a move with just a promote piece
  *
+ * If no promote piece is supplied and pawn will promote,
+ * a queen will be sat as the promote piece
+ *
+ * RETURN (Move move)
  */
-static Move move_promote_create(Piece sourcePiece, Square targetSquare, Piece promotePiece)
+static Move move_promote_piece_create(Piece sourcePiece, Square targetSquare, Piece promotePiece)
 {
   if(sourcePiece == PIECE_WHITE_PAWN)
   {
@@ -183,7 +188,7 @@ Move move_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece
   move |= MOVE_TARGET_SET(targetSquare);
   move |= MOVE_PIECE_SET(sourcePiece);
 
-  move |= move_promote_create(sourcePiece, targetSquare, promotePiece);
+  move |= move_promote_piece_create(sourcePiece, targetSquare, promotePiece);
   move |= move_flag_create(boards, sourcePiece, sourceSquare, targetSquare);
 
   return move;

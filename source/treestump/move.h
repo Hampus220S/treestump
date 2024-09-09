@@ -40,13 +40,13 @@ extern const Move MOVE_NONE;
 extern void move_make(Position* position, Move move);
 
 
-extern Move create_double_move(Square sourceSquare, Square targetSquare, Piece piece);
+extern Move move_double_create(Square sourceSquare, Square targetSquare, Piece piece);
 
-extern Move create_promote_move(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece, Piece promotePiece);
+extern Move move_promote_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece, Piece promotePiece);
 
-extern Move create_castle_move(Square sourceSquare, Square targetSquare, Piece piece);
+extern Move move_castle_create(Square sourceSquare, Square targetSquare, Piece piece);
 
-extern Move create_normal_move(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece);
+extern Move move_normal_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece);
 
 extern Move move_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece promotePiece);
 
