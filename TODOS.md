@@ -13,8 +13,6 @@
 * use switch case instead of if statements
 * rename amount to move_count ex
 
-* Make PIECE_NONE have value 0, then it will default to PIECE_NONE instead of PIECE_WHITE_PAWN
-
 * refactore code in move_legal (make it more effective without repeating code validation)
 
 Future

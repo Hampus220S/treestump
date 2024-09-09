@@ -4,10 +4,24 @@
  * Last updated: 2024-09-08
  */
 
-#ifndef STRING_H
-#define STRING_H
+#ifndef UCI_H
+#define UCI_H
 
 #include "../treestump.h"
+
+extern const char* FEN_START;
+
+extern const Piece SYMBOL_PIECES[];
+
+extern const char* SQUARE_STRINGS[BOARD_SQUARES];
+
+extern const char PIECE_SYMBOLS[12];
+
+
+extern bool fen_parse(Position* position, const char fenString[]);
+
+extern int  uci_parse(Position* position, const char* uci_string);
+
 
 extern bool string_split_at_delim(char (*stringArray)[128], const char string[], int length, const char delim[], int amount);
 
@@ -16,4 +30,4 @@ extern char* move_string_create(char* string, Move move);
 
 extern Move  move_string_parse(U64 boards[12], const char* string);
 
-#endif // STRING_H
+#endif // UCI_H

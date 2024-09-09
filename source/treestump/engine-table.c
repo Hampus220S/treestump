@@ -15,6 +15,11 @@ U64 CASTLE_HASH_KEYS[16];
 
 U64 SIDE_HASH_KEY;
 
+/*
+ * Based on treestump1,
+ * board-zobrist-hash.c
+ * this function initializes the different kinds zobrist hash keys
+ */
 void init_random_keys()
 {
   RANDOM_STATE = 1804289383;
@@ -37,6 +42,11 @@ void init_random_keys()
   SIDE_HASH_KEY = random_U64();
 }
 
+/*
+ * Based on treestump1,
+ * board-zobrist-hash.c
+ * This function creates a zobrist hash of the current position
+ */
 U64 create_hash_key(Position position)
 {
   U64 hashKey = 0ULL;

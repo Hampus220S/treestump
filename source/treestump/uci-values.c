@@ -1,13 +1,5 @@
 #include "../treestump.h"
 
-const Castle CASTLE_WHITE_KING   = 0b0001;
-const Castle CASTLE_WHITE_QUEEN  = 0b0010;
-const Castle CASTLE_BLACK_KING   = 0b0100;
-const Castle CASTLE_BLACK_QUEEN  = 0b1000;
-
-const Castle CASTLE_WHITE = (CASTLE_WHITE_KING | CASTLE_WHITE_QUEEN);
-const Castle CASTLE_BLACK = (CASTLE_BLACK_KING | CASTLE_BLACK_QUEEN);
-
 const char* SQUARE_STRINGS[BOARD_SQUARES] = 
 {
   "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8", 
@@ -37,20 +29,3 @@ const Piece SYMBOL_PIECES[] =
   ['q'] = PIECE_BLACK_QUEEN,
   ['k'] = PIECE_BLACK_KING
 };
-
-
-const Move MOVE_MASK_SOURCE   = 0x00003f;
-const Move MOVE_MASK_TARGET   = 0x000fc0;
-const Move MOVE_MASK_PIECE    = 0x00f000;
-const Move MOVE_MASK_PROMOTE  = 0x0f0000;
-const Move MOVE_MASK_CAPTURE  = 0x100000;
-const Move MOVE_MASK_DOUBLE   = 0x200000;
-const Move MOVE_MASK_PASSANT  = 0x400000;
-const Move MOVE_MASK_CASTLE   = 0x800000;
-
-const Move MOVE_SHIFT_SOURCE    = 0;
-const Move MOVE_SHIFT_TARGET    = 6;
-const Move MOVE_SHIFT_PIECE     = 12;
-const Move MOVE_SHIFT_PROMOTE   = 16;
-
-const Move MOVE_NONE = 0;

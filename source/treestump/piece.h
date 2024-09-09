@@ -9,6 +9,23 @@
 
 #include "../treestump.h"
 
+typedef enum
+{
+  PIECE_WHITE_PAWN, 
+  PIECE_WHITE_KNIGHT, 
+  PIECE_WHITE_BISHOP, 
+  PIECE_WHITE_ROOK, 
+  PIECE_WHITE_QUEEN, 
+  PIECE_WHITE_KING,
+  PIECE_BLACK_PAWN, 
+  PIECE_BLACK_KNIGHT, 
+  PIECE_BLACK_BISHOP, 
+  PIECE_BLACK_ROOK, 
+  PIECE_BLACK_QUEEN, 
+  PIECE_BLACK_KING,
+  PIECE_NONE
+} Piece;
+
 // Remove extern from this, and create getter like for attacks
 extern U64 BOARD_LOOKUP_LINES[BOARD_SQUARES][BOARD_SQUARES];
 
