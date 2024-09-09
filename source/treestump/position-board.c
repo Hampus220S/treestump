@@ -53,7 +53,7 @@ static U64 create_board_line(Square source, Square target)
  * Initialize lookup line boards
  * from every square on the board to every other square on the board
  */
-void init_board_lookup_lines(void)
+void board_lines_init(void)
 {
   for(Square sourceSquare = A8; sourceSquare <= H1; sourceSquare++)
   {

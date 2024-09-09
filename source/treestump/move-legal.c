@@ -11,107 +11,6 @@
 /*
  *
  */
-static bool square_is_attacked_by_queen(Position position, Square square, Side side)
-{
-  U64 attacks = queen_lookup_attacks(square, position);
-
-  U64 board = (side == SIDE_WHITE) ?
-              position.boards[PIECE_WHITE_QUEEN] :
-              position.boards[PIECE_BLACK_QUEEN];
-
-  return (attacks & board);
-}
-
-/*
- *
- */
-static bool square_is_attacked_by_bishop(Position position, Square square, Side side)
-{
-  U64 attacks = bishop_lookup_attacks(square, position);
-
-  U64 board = (side == SIDE_WHITE) ?
-              position.boards[PIECE_WHITE_BISHOP] :
-              position.boards[PIECE_BLACK_BISHOP];
-
-  return (attacks & board);
-}
-
-/*
- *
- */
-static bool square_is_attacked_by_rook(Position position, Square square, Side side)
-{
-  U64 attacks = rook_lookup_attacks(square, position);
-
-  U64 board = (side == SIDE_WHITE) ?
-              position.boards[PIECE_WHITE_ROOK] :
-              position.boards[PIECE_BLACK_ROOK];
-
-  return (attacks & board);
-}
-
-/*
- *
- */
-static bool square_is_attacked_by_pawn(Position position, Square square, Side side)
-{
-  U64 attacks = (side == SIDE_WHITE) ?
-                pawn_lookup_attacks(square, SIDE_BLACK) :
-                pawn_lookup_attacks(square, SIDE_WHITE);
-
-  U64 board = (side == SIDE_WHITE) ?
-              position.boards[PIECE_WHITE_PAWN] :
-              position.boards[PIECE_BLACK_PAWN];
-
-  return (attacks & board);
-}
-
-/*
- *
- */
-static bool square_is_attacked_by_king(Position position, Square square, Side side)
-{
-  U64 attacks = king_lookup_attacks(square);
-
-  U64 board = (side == SIDE_WHITE) ?
-              position.boards[PIECE_WHITE_KING] :
-              position.boards[PIECE_BLACK_KING];
-
-  return (attacks & board);
-}
-
-/*
- *
- */
-static bool square_is_attacked_by_knight(Position position, Square square, Side side)
-{
-  U64 attacks = knight_lookup_attacks(square);
-
-  U64 board = (side == SIDE_WHITE) ?
-              position.boards[PIECE_WHITE_KNIGHT] :
-              position.boards[PIECE_BLACK_KNIGHT];
-
-  return (attacks & board);
-}
-
-/*
- * Check if supplied square is attacked by oponent side pieces
- *
- * Next: Add side back to functions
- */
-bool square_is_attacked(Position position, Square square, Side side)
-{
-  return (square_is_attacked_by_queen( position, square, side) ||
-          square_is_attacked_by_rook(  position, square, side) ||
-          square_is_attacked_by_bishop(position, square, side) ||
-          square_is_attacked_by_pawn(  position, square, side) ||
-          square_is_attacked_by_king(  position, square, side) ||
-          square_is_attacked_by_knight(position, square, side));
-}
-
-/*
- *
- */
 static bool move_pawn_double_white_is_pseudo_legal(Position position, Move move)
 {
   Square sourceSquare = MOVE_SOURCE_GET(move);
@@ -249,7 +148,7 @@ static bool move_pawn_capture_is_pseudo_legal(Position position, Move move)
 
   Side side = (sourceWhite ? SIDE_WHITE : SIDE_BLACK);
 
-  return (pawn_lookup_attacks(sourceSquare, side) & (1ULL << targetSquare));
+  return (attacks_pawn_get(sourceSquare, side) & (1ULL << targetSquare));
 }
 
 /*
@@ -469,7 +368,7 @@ static bool move_normal_is_pseudo_legal(Position position, Move move)
   if(BOARD_LOOKUP_LINES[sourceSquare][targetSquare] & position.covers[SIDE_BOTH]) return false;
 
   // The piece is able to move from sourceSquare to targetSquare
-  return (piece_lookup_attacks(sourceSquare, position) & (1ULL << targetSquare));
+  return (attacks_get(sourceSquare, position) & (1ULL << targetSquare));
 }
 
 /*

@@ -57,17 +57,17 @@ static error_t opt_parse(int key, char* arg, struct argp_state* state)
 /*
  *
  */
-static void init_all(void)
+static void all_init(void)
 {
-  init_piece_lookup_masks();
+  masks_init();
 
-  init_bishop_rook_relevant_bits();
+  relevant_bits_init();
 
-  init_piece_lookup_attacks();
+  attacks_init();
 
-  init_board_lookup_lines();
+  board_lines_init();
 
-  init_random_keys();
+  random_keys_init();
 }
 
 /*
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 
   info_print("Start of main");
 
-  init_all();
+  all_init();
 
   Position position;
   fen_parse(&position, FEN_START);

@@ -29,27 +29,25 @@ typedef enum
 // Remove extern from this, and create getter like for attacks
 extern U64 BOARD_LOOKUP_LINES[BOARD_SQUARES][BOARD_SQUARES];
 
-extern void init_board_lookup_lines(void);
+extern void attacks_init(void);
 
-extern void init_piece_lookup_attacks(void);
+extern void masks_init(void);
 
-extern void init_piece_lookup_masks(void);
-
-extern void init_bishop_rook_relevant_bits(void);
+extern void relevant_bits_init(void);
 
 
-extern U64 bishop_lookup_attacks(Square square, Position position);
+extern U64 attacks_bishop_get(Square square, Position position);
 
-extern U64 rook_lookup_attacks  (Square square, Position position);
+extern U64 attacks_rook_get  (Square square, Position position);
 
-extern U64 queen_lookup_attacks (Square square, Position position);
+extern U64 attacks_queen_get (Square square, Position position);
 
-extern U64 king_lookup_attacks  (Square square);
+extern U64 attacks_king_get  (Square square);
 
-extern U64 knight_lookup_attacks(Square square);
+extern U64 attacks_knight_get(Square square);
 
-extern U64 pawn_lookup_attacks  (Square square, Side side);
+extern U64 attacks_pawn_get  (Square square, Side side);
 
-extern U64 piece_lookup_attacks (Square square, Position position);
+extern U64 attacks_get       (Square square, Position position);
 
 #endif // PIECE_H

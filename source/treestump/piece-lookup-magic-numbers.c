@@ -44,26 +44,29 @@ U64 generate_covers_magic_number(U64 covers[4096], int relevantBits, U64 attacks
   return 0ULL;
 }
 
+/*
+ * Rename this function and break it up into bishop and rook functions
+ */
 U64 generate_square_magic_number(Square square, int relevantBits, bool bishop)
 {
   U64 covers[4096];
 
   U64 attacks[4096];
 
-  U64 attackMask = bishop ? BISHOP_LOOKUP_MASKS[square] : ROOK_LOOKUP_MASKS[square];
+  U64 attackMask = bishop ? MASKS_BISHOP[square] : MASKS_ROOK[square];
 
   int coverIndicies = 1 << relevantBits;
 
   for (int index = 0; index < coverIndicies; index++)
   {
-    covers[index] = create_index_cover(index, attackMask, relevantBits);
+    covers[index] = index_cover_create(index, attackMask, relevantBits);
 
-    attacks[index] = bishop ? calculate_bishop_attacks(square, covers[index]) : calculate_rook_attacks(square, covers[index]);
+    attacks[index] = bishop ? attacks_bishop_create(square, covers[index]) : attacks_rook_create(square, covers[index]);
   }
   return generate_covers_magic_number(covers, relevantBits, attacks, attackMask);
 }
 
-const U64 ROOK_MAGIC_NUMBERS[64] = 
+U64 MAGIC_NUMBERS_ROOK[BOARD_SQUARES] = 
 {
   0x8a80104000800020ULL,
   0x140002000100040ULL,
@@ -131,7 +134,7 @@ const U64 ROOK_MAGIC_NUMBERS[64] =
   0x1004081002402ULL
 };
 
-const U64 BISHOP_MAGIC_NUMBERS[64] = {
+U64 MAGIC_NUMBERS_BISHOP[BOARD_SQUARES] = {
   0x40040844404084ULL,
   0x2004208a004208ULL,
   0x10190041080202ULL,
@@ -199,13 +202,14 @@ const U64 BISHOP_MAGIC_NUMBERS[64] = {
 };
 
 /*
-void init_magic_numbers(void)
+ *
+ */
+void magic_numbers_init(void)
 {
-  for (int square = 0; square < 64; square++)
+  for(Square square = 0; square < BOARD_SQUARES; square++)
   {
-    ROOK_MAGIC_NUMBERS[square] = generate_square_magic_number(square, ROOK_RELEVANT_BITS[square], false);
+    MAGIC_NUMBERS_ROOK  [square] = generate_square_magic_number(square, RELEVANT_BITS_ROOK  [square], false);
 
-    BISHOP_MAGIC_NUMBERS[square] = generate_square_magic_number(square, BISHOP_RELEVANT_BITS[square], true);
+    MAGIC_NUMBERS_BISHOP[square] = generate_square_magic_number(square, RELEVANT_BITS_BISHOP[square], true);
   }
 }
-*/

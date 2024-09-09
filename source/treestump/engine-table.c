@@ -24,7 +24,7 @@ U64 SIDE_HASH_KEY;
  * board-zobrist-hash.c
  * this function initializes the different kinds zobrist hash keys
  */
-void init_random_keys()
+void random_keys_init()
 {
   RANDOM_STATE = 1804289383;
 

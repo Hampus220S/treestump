@@ -6,14 +6,14 @@
 
 #include "../treestump.h"
 
-U64 BISHOP_LOOKUP_MASKS[BOARD_SQUARES];
-U64 ROOK_LOOKUP_MASKS[BOARD_SQUARES];
-U64 PAWN_LOOKUP_MASKS[2][BOARD_SQUARES];
-U64 KNIGHT_LOOKUP_MASKS[BOARD_SQUARES];
-U64 KING_LOOKUP_MASKS[BOARD_SQUARES];
+U64 MASKS_BISHOP [BOARD_SQUARES];
+U64 MASKS_ROOK   [BOARD_SQUARES];
+U64 MASKS_PAWN[2][BOARD_SQUARES];
+U64 MASKS_KNIGHT [BOARD_SQUARES];
+U64 MASKS_KING   [BOARD_SQUARES];
 
-int BISHOP_RELEVANT_BITS[BOARD_SQUARES];
-int ROOK_RELEVANT_BITS[BOARD_SQUARES];
+int RELEVANT_BITS_BISHOP[BOARD_SQUARES];
+int RELEVANT_BITS_ROOK  [BOARD_SQUARES];
 
 const U64 NOT_A_FILE  = 18374403900871474942ULL;
 const U64 NOT_H_FILE  = 9187201950435737471ULL;
@@ -23,7 +23,7 @@ const U64 NOT_AB_FILE = 18229723555195321596ULL;
 /*
  *
  */
-U64 mask_pawn_attacks(Side side, Square square)
+static U64 mask_pawn_attacks(Side side, Square square)
 {
   U64 attacks = 0ULL;
 
@@ -42,7 +42,10 @@ U64 mask_pawn_attacks(Side side, Square square)
   return attacks;
 }
 
-U64 mask_knight_attacks(Square square)
+/*
+ *
+ */
+static U64 mask_knight_attacks(Square square)
 {
   U64 attacks = 0ULL;
 
@@ -61,7 +64,10 @@ U64 mask_knight_attacks(Square square)
   return attacks;
 }
 
-U64 mask_king_attacks(Square square)
+/*
+ *
+ */
+static U64 mask_king_attacks(Square square)
 {
   U64 attacks = 0ULL;
 
@@ -80,7 +86,10 @@ U64 mask_king_attacks(Square square)
   return attacks;
 }
 
-U64 mask_bishop_attacks(Square square)
+/*
+ *
+ */
+static U64 mask_bishop_attacks(Square square)
 {
   U64 attacks = 0ULL;
 
@@ -106,7 +115,10 @@ U64 mask_bishop_attacks(Square square)
   return attacks;
 }
 
-U64 mask_rook_attacks(Square square)
+/*
+ *
+ */
+static U64 mask_rook_attacks(Square square)
 {
   U64 attacks = 0ULL;
 
@@ -132,30 +144,37 @@ U64 mask_rook_attacks(Square square)
   return attacks;
 }
 
-void init_piece_lookup_masks()
+
+/*
+ *
+ */
+void masks_init(void)
 {
   for (Square square = 0; square < BOARD_SQUARES; square++)
   {
-    PAWN_LOOKUP_MASKS[SIDE_WHITE][square] = mask_pawn_attacks(SIDE_WHITE, square);
+    MASKS_PAWN[SIDE_WHITE][square] = mask_pawn_attacks(SIDE_WHITE, square);
 
-    PAWN_LOOKUP_MASKS[SIDE_BLACK][square] = mask_pawn_attacks(SIDE_BLACK, square);
+    MASKS_PAWN[SIDE_BLACK][square] = mask_pawn_attacks(SIDE_BLACK, square);
 
-    KNIGHT_LOOKUP_MASKS[square] = mask_knight_attacks(square);
+    MASKS_KNIGHT[square] = mask_knight_attacks(square);
 
-    KING_LOOKUP_MASKS[square] = mask_king_attacks(square);
+    MASKS_KING[square] = mask_king_attacks(square);
 
-    ROOK_LOOKUP_MASKS[square] = mask_rook_attacks(square);
+    MASKS_ROOK[square] = mask_rook_attacks(square);
 
-    BISHOP_LOOKUP_MASKS[square] = mask_bishop_attacks(square);
+    MASKS_BISHOP[square] = mask_bishop_attacks(square);
   }
 }
 
-void init_bishop_rook_relevant_bits()
+/*
+ *
+ */
+void relevant_bits_init(void)
 {
   for (Square square = 0; square < BOARD_SQUARES; square++)
   {
-    BISHOP_RELEVANT_BITS[square] = board_bit_amount(BISHOP_LOOKUP_MASKS[square]);
+    RELEVANT_BITS_BISHOP[square] = board_bit_amount(MASKS_BISHOP[square]);
 
-    ROOK_RELEVANT_BITS[square] = board_bit_amount(ROOK_LOOKUP_MASKS[square]);
+    RELEVANT_BITS_ROOK  [square] = board_bit_amount(MASKS_ROOK  [square]);
   }
 }

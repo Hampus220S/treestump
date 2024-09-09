@@ -66,6 +66,6 @@ typedef struct
 #include "treestump/uci.h"
 #include "treestump/engine.h"
 
-extern void init_random_keys(void);
+extern void random_keys_init(void);
 
 #endif // TREESTUMP_H
