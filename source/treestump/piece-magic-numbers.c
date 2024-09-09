@@ -15,6 +15,14 @@ extern U64 random_U64(void);
 /*
  *
  */
+int magic_index_create(U64 cover, U64 magic_number, int relevant_bits)
+{
+  return ((cover * magic_number) >> (BOARD_SQUARES - relevant_bits));
+}
+
+/*
+ *
+ */
 U64 generate_covers_magic_number(U64 covers[4096], int relevantBits, U64 attacks[4096], U64 attackMask)
 {
   U64 usedAttacks[4096];
@@ -33,7 +41,7 @@ U64 generate_covers_magic_number(U64 covers[4096], int relevantBits, U64 attacks
 
     for(int index = 0; !fail && index < coverIndicies; index++)
     {
-      int magicIndex = ((covers[index] * magicNumber) >> (BOARD_SQUARES - relevantBits));
+      int magicIndex = magic_index_create(covers[index], magicNumber, relevantBits);
 
       if(!usedAttacks[magicIndex]) usedAttacks[magicIndex] = attacks[index];
 

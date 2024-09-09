@@ -11,7 +11,7 @@ extern const int PIECE_SCORES[12];
 
 extern void create_moves(MoveArray* moveArray, Position position);
 
-extern int position_score(Position position);
+extern int position_score_get(Position position);
 
 extern void guess_order_moves(MoveArray* moveArray, Position position);
 

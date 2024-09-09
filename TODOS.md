@@ -12,7 +12,7 @@
 * use switch case instead of if statements
 * rename amount to move_count ex
 * extract square score from files intead of hard coded values
-* rename mask_rook_attacks to maybe attacks_rook_mask_create/get
+* rename create_moves
 
 * refactore code in move_legal (make it more effective without repeating code validation)
 

@@ -71,7 +71,7 @@ int negamax(Position position, int depth, int nodes, int alpha, int beta)
   /*
   if(nodes > 0 && searchedNodes >= nodes)
   {
-    int score = position_score(position);
+    int score = position_score_get(position);
 
     return (position.side == SIDE_WHITE) ? score : -score;
   }
@@ -81,7 +81,7 @@ int negamax(Position position, int depth, int nodes, int alpha, int beta)
   {
     searchedNodes++;
 
-    int score = position_score(position);
+    int score = position_score_get(position);
 
     return (position.side == SIDE_WHITE) ? score : -score;
   }

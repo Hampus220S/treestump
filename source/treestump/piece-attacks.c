@@ -129,7 +129,7 @@ static void attacks_rook_init(void)
     {
       U64 cover = index_cover_create(index, MASKS_ROOK[square], relevantBits);
 
-      int magicIndex = (cover * MAGIC_NUMBERS_ROOK[square]) >> (BOARD_SQUARES - relevantBits);
+      int magicIndex = magic_index_create(cover, MAGIC_NUMBERS_ROOK[square], relevantBits);
 
       ATTACKS_ROOK[square][magicIndex] = attacks_rook_create(square, cover);
     }
@@ -152,7 +152,7 @@ static void attacks_bishop_init(void)
     {
       U64 cover = index_cover_create(index, MASKS_BISHOP[square], relevantBits);
 
-      int magicIndex = (cover * MAGIC_NUMBERS_BISHOP[square]) >> (BOARD_SQUARES - relevantBits);
+      int magicIndex = magic_index_create(cover, MAGIC_NUMBERS_BISHOP[square], relevantBits);
 
       ATTACKS_BISHOP[square][magicIndex] = attacks_bishop_create(square, cover);
     }

@@ -21,6 +21,9 @@ extern U64 MAGIC_NUMBERS_ROOK  [BOARD_SQUARES];
 
 extern U64 index_cover_create(int index, U64 attackMask, int bitAmount);
 
+extern int magic_index_create(U64 cover, U64 magic_number, int relevant_bits);
+
+
 extern U64 attacks_bishop_create(Square square, U64 block);
 
 extern U64 attacks_rook_create(Square square, U64 block);

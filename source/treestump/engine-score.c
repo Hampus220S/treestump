@@ -1,4 +1,6 @@
 /*
+ * Give a position a score
+ *
  * Written by Hampus Fridholm
  *
  * Last updated: 2024-09-09
@@ -80,37 +82,71 @@ const Square MIRROR_SQUARES[BOARD_SQUARES] =
   A8, B8, C8, D8, E8, F8, G8, H8
 };
 
-const int PIECE_SCORES[12] = {100, 300, 350, 500, 1000, 10000, -100, -300, -350, -500, -1000, -10000};
+const int PIECE_SCORES[12] = {100, 300, 350, 500, 1000, 10000};
 
 /*
- *
+ * Maybe: Load values into SQUARE_SCORES[BOARD_SQUARES][12]
  */
-int piece_square_score(Piece piece, Square square)
+int square_score_get(Piece piece, Square square)
 {
   switch(piece)
   {
-    case PIECE_WHITE_PAWN:    return SQUARE_SCORES_PAWN[square];
-    case PIECE_WHITE_KNIGHT:  return SQUARE_SCORES_KNIGHT[square];
-    case PIECE_WHITE_BISHOP:  return SQUARE_SCORES_BISHOP[square];
-    case PIECE_WHITE_ROOK:    return SQUARE_SCORES_ROOK[square];
-    //case PIECE_WHITE_QUEEN:   return SQUARE_SCORES_QUEEN[square];
-    case PIECE_WHITE_KING:    return SQUARE_SCORES_KING[square];
+    case PIECE_WHITE_PAWN:
+      return SQUARE_SCORES_PAWN[square];
 
-    case PIECE_BLACK_PAWN:    return -SQUARE_SCORES_PAWN[MIRROR_SQUARES[square]];
-    case PIECE_BLACK_KNIGHT:  return -SQUARE_SCORES_KNIGHT[MIRROR_SQUARES[square]];
-    case PIECE_BLACK_BISHOP:  return -SQUARE_SCORES_BISHOP[MIRROR_SQUARES[square]];
-    case PIECE_BLACK_ROOK:    return -SQUARE_SCORES_ROOK[MIRROR_SQUARES[square]];
-    //case PIECE_BLACK_QUEEN:   return -SQUARE_SCORES_QUEEN[MIRROR_SQUARES[square]];
-    case PIECE_BLACK_KING:    return -SQUARE_SCORES_KING[MIRROR_SQUARES[square]];
+    case PIECE_WHITE_KNIGHT:
+      return SQUARE_SCORES_KNIGHT[square];
 
-    default: return 0;
+    case PIECE_WHITE_BISHOP:
+      return SQUARE_SCORES_BISHOP[square];
+
+    case PIECE_WHITE_ROOK:
+      return SQUARE_SCORES_ROOK[square];
+
+    case PIECE_WHITE_KING:
+      return SQUARE_SCORES_KING[square];
+
+    case PIECE_BLACK_PAWN:
+      return -SQUARE_SCORES_PAWN[MIRROR_SQUARES[square]];
+
+    case PIECE_BLACK_KNIGHT:
+      return -SQUARE_SCORES_KNIGHT[MIRROR_SQUARES[square]];
+
+    case PIECE_BLACK_BISHOP:
+      return -SQUARE_SCORES_BISHOP[MIRROR_SQUARES[square]];
+
+    case PIECE_BLACK_ROOK:
+      return -SQUARE_SCORES_ROOK[MIRROR_SQUARES[square]];
+
+    case PIECE_BLACK_KING:
+      return -SQUARE_SCORES_KING[MIRROR_SQUARES[square]];
+
+    default:
+      return 0;
   }
 }
 
 /*
- *
+ * Get the score assosiated with a specific piece
  */
-int position_board_score(U64 boards[12])
+static int piece_score_get(Piece piece)
+{
+  if(piece >= PIECE_WHITE_PAWN && piece <= PIECE_WHITE_KING)
+  {
+    return PIECE_SCORES[piece];
+  }
+  else if(piece >= PIECE_BLACK_PAWN && piece <= PIECE_BLACK_KING)
+  {
+    return PIECE_SCORES[piece - PIECE_BLACK_PAWN];
+  }
+  else return 0;
+}
+
+/*
+ * Get the score of the board,
+ * based on what pieces are at what squares
+ */
+static int board_score_get(U64 boards[12])
 {
   int boardScore = 0;
 
@@ -122,26 +158,24 @@ int position_board_score(U64 boards[12])
     {
       Square square = board_ls1b_index(bitboard);
 
-
-      boardScore += PIECE_SCORES[piece];
-      boardScore += piece_square_score(piece, square);
-
-
+      boardScore += piece_score_get(piece);
+      boardScore += square_score_get(piece, square);
 
       bitboard = BOARD_SQUARE_POP(bitboard, square);
     }
   }
+
   return boardScore;
 }
 
 /*
- *
+ * Get a calculated score of the position
  */
-int position_score(Position position)
+int position_score_get(Position position)
 {
   int positionScore = 0;
 
-  positionScore += position_board_score(position.boards);
+  positionScore += board_score_get(position.boards);
   
   return positionScore;
 }

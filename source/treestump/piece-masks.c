@@ -23,7 +23,7 @@ const U64 NOT_AB_FILE = 18229723555195321596ULL;
 /*
  *
  */
-static U64 mask_pawn_attacks(Side side, Square square)
+static U64 mask_pawn_create(Square square, Side side)
 {
   U64 attacks = 0ULL;
 
@@ -45,7 +45,7 @@ static U64 mask_pawn_attacks(Side side, Square square)
 /*
  *
  */
-static U64 mask_knight_attacks(Square square)
+static U64 mask_knight_create(Square square)
 {
   U64 attacks = 0ULL;
 
@@ -67,7 +67,7 @@ static U64 mask_knight_attacks(Square square)
 /*
  *
  */
-static U64 mask_king_attacks(Square square)
+static U64 mask_king_create(Square square)
 {
   U64 attacks = 0ULL;
 
@@ -89,7 +89,7 @@ static U64 mask_king_attacks(Square square)
 /*
  *
  */
-static U64 mask_bishop_attacks(Square square)
+static U64 mask_bishop_create(Square square)
 {
   U64 attacks = 0ULL;
 
@@ -118,7 +118,7 @@ static U64 mask_bishop_attacks(Square square)
 /*
  *
  */
-static U64 mask_rook_attacks(Square square)
+static U64 mask_rook_create(Square square)
 {
   U64 attacks = 0ULL;
 
@@ -152,17 +152,17 @@ void masks_init(void)
 {
   for (Square square = 0; square < BOARD_SQUARES; square++)
   {
-    MASKS_PAWN[SIDE_WHITE][square] = mask_pawn_attacks(SIDE_WHITE, square);
+    MASKS_PAWN[SIDE_WHITE][square] = mask_pawn_create  (square, SIDE_WHITE);
 
-    MASKS_PAWN[SIDE_BLACK][square] = mask_pawn_attacks(SIDE_BLACK, square);
+    MASKS_PAWN[SIDE_BLACK][square] = mask_pawn_create  (square, SIDE_BLACK);
 
-    MASKS_KNIGHT[square] = mask_knight_attacks(square);
+    MASKS_KNIGHT          [square] = mask_knight_create(square);
 
-    MASKS_KING[square] = mask_king_attacks(square);
+    MASKS_KING            [square] = mask_king_create  (square);
 
-    MASKS_ROOK[square] = mask_rook_attacks(square);
+    MASKS_ROOK            [square] = mask_rook_create  (square);
 
-    MASKS_BISHOP[square] = mask_bishop_attacks(square);
+    MASKS_BISHOP          [square] = mask_bishop_create(square);
   }
 }
 
