@@ -9,91 +9,133 @@
 #include "uci-intern.h"
 
 /*
+ * Split a string at deliminator into multiple smaller string parts
  *
+ * PARAMS
+ * - char** string_array | array to store splitted strings to
+ *   - the array should be allocated with size >= split_amount
+ *
+ * RETURN (size_t count)
+ * - number of strings successfully splitted
  */
-static bool fen_side_parse(Side* side, const char string[])
+static size_t string_split_at_delim(char** string_array, const char* string, const char* delim, size_t split_amount)
 {
-  int stringLength = strlen(string);
-
-  if(stringLength != 1) return false;
-
-  if(*string == 'w')
+  if(!string_array || !string)
   {
-    *side = SIDE_WHITE;
-    return true;
+    error_print("String array or string not allocated");
+
+    return 0;
   }
-  else if(*string == 'b')
+
+  if(split_amount <= 0) return 0;
+
+  char string_copy[strlen(string) + 1]; 
+  strcpy(string_copy, string);
+
+  char* string_token = NULL;
+  
+  string_token = strtok(string_copy, delim);
+
+  size_t index;
+
+  for(index = 0; (index < split_amount) && string_token; index++)
   {
-    *side = SIDE_BLACK;
-    return true;
+    string_array[index] = strdup(string_token);
+
+    string_token = strtok(NULL, delim);
   }
-  return false;
+
+  return index;
 }
 
 /*
  *
  */
-static bool fen_clock_parse(int* clock, const char string[])
+static int fen_side_parse(Side* side, const char* string)
+{
+  if(strlen(string) != 1) return 1;
+
+  switch(*string)
+  {
+    case 'w':
+      *side = SIDE_WHITE;
+      return 0;
+
+    case 'b':
+      *side = SIDE_BLACK;
+      return 0;
+
+    default:
+      return 2;
+  }
+}
+
+/*
+ *
+ */
+static int fen_clock_parse(int* clock, const char* string)
 {
   int number = atoi(string);
 
-  if((number == 0) && (*string != '0')) return false;
+  if((number == 0) && (*string != '0')) return 1;
 
   *clock = number;
 
-  return true;
+  return 0;
 }
 
 /*
  *
  */
-static bool fen_turns_parse(int* turns, const char string[])
+static int fen_turns_parse(int* turns, const char* string)
 {
   int number = atoi(string);
 
-  if((number == 0) && (*string != '0')) return false;
+  if((number == 0) && (*string != '0')) return 1;
 
   *turns = number;
 
-  return true;
+  return 0;
 }
 
 /*
  *
  */
-static bool fen_passant_parse(Square* passant, const char string[])
+static int fen_passant_parse(Square* passant, const char* string)
 {
-  if(!strcmp(string, "-"))
+  if(strcmp(string, "-") == 0)
   {
     *passant = SQUARE_NONE;
     
-    return true;
+    return 0;
   }
 
-  if(strlen(string) != 2) return false;
+  if(strlen(string) != 2) return 1;
 
 
   int file = string[0] - 'a';
   int rank = BOARD_RANKS - (string[1] - '0');
 
-  if(!(file >= 0 && file < BOARD_FILES) || !(rank >= 0 && rank < BOARD_RANKS)) return false;
+  if(!(file >= 0 && file < BOARD_FILES) || !(rank >= 0 && rank < BOARD_RANKS))
+  {
+    return 2;
+  }
 
   *passant = (rank * BOARD_FILES) + file;
 
-  return true;
+  return 0;
 }
 
 /*
  *
  */
-static bool fen_castle_parse(Castle* castle, const char string[])
+static int fen_castle_parse(Castle* castle, const char* string)
 {
-  if(!strcmp(string, "-")) return true;
+  if(strcmp(string, "-") == 0) return 0;
 
-  int stringLength = strlen(string);
+  size_t string_len = strlen(string);
 
-  // Future Fix: Check for duplicate symbols and string length
-  for(int index = 0; index < stringLength; index++)
+  for(size_t index = 0; index < string_len; index++)
   {
     switch(string[index])
     {
@@ -113,32 +155,61 @@ static bool fen_castle_parse(Castle* castle, const char string[])
         *castle |= CASTLE_BLACK_QUEEN;
         break;
 
-      default: return false;
+      default:
+        return 1;
     }
   }
-  return true;
+
+  return 0;
 }
 
 /*
  *
  */
-static bool fen_boards_parse(U64 boards[12], const char string[])
+static void string_array_free(char** string_array, size_t string_count)
 {
-  char stringArray[8][128];
+  if(!string_array) return;
 
-  int stringLength = strlen(string);
+  for(size_t index = 0; index < string_count; index++)
+  {
+    if(string_array[index]) free(string_array[index]);
+  }
+}
 
-  if(!string_split_at_delim(stringArray, string, stringLength, "/", BOARD_RANKS)) return false;
+/*
+ * RETURN (int status)
+ * - 0 | Success
+ * - 1 | Failed to split fen board
+ */
+static int fen_boards_parse(U64 boards[12], const char string[])
+{
+  memset(boards, 0ULL, sizeof(U64) * 12);
+
+  char* string_array[8];
+
+  size_t split_count = 0;
+
+  if((split_count = string_split_at_delim(string_array, string, "/", BOARD_RANKS)) < BOARD_RANKS)
+  {
+    error_print("Failed to split fen board string");
+
+    string_array_free(string_array, split_count);
+
+    return 1;
+  }
 
   for(int rank = 0; rank < BOARD_RANKS; rank++)
   {
+    char*  rank_string        = string_array[rank];
+    size_t rank_string_length = strlen(rank_string);
+
     // Future Fix: check if rank length is less or equal to 8
     // and if there is any symbols that should not be in fen string
     int file = 0;
 
-    for(int index = 0; index < strlen(stringArray[rank]); index++)
+    for(int index = 0; index < rank_string_length; index++)
     {
-      unsigned char symbol = stringArray[rank][index];
+      char symbol = rank_string[index];
 
 
       Square square = (rank * BOARD_FILES) + file;
@@ -155,47 +226,105 @@ static bool fen_boards_parse(U64 boards[12], const char string[])
       {
         file += (symbol - '0');
       }
-      else return false;
+      else
+      {
+        error_print("Unknown fen symbol: (%c)", symbol);
+      }
     }
   }
-  return true;
+
+  string_array_free(string_array, split_count);
+
+  return 0;
 }
 
 /*
  *
  */
-bool fen_parse(Position* position, const char fenString[])
+static void fen_index_part_parse(Position* position, int index, const char* string)
 {
-  memset(position->boards, 0ULL, sizeof(position->boards));
+  switch(index)
+  {
+    case 0:
+      if(fen_boards_parse(position->boards, string) != 0)
+      {
+        error_print("Failed to parse fen board");
+      }
+      break;
 
-  memset(position->covers, 0ULL, sizeof(position->covers));
+    case 1:
+      if(fen_side_parse(&position->side, string) != 0)
+      {
+        error_print("Failed to parse fen side");
+      }
+      break;
+
+    case 2:
+      if(fen_castle_parse(&position->castle, string) != 0)
+      {
+        error_print("Failed to parse fen castle");
+      }
+      break;
+
+    case 3:
+      if(fen_passant_parse(&position->passant, string) != 0)
+      {
+        error_print("Failed to parse fen passant");
+      }
+      break;
+
+    case 4:
+      if(fen_clock_parse(&position->clock, string) != 0)
+      {
+        error_print("Failed to parse fen clock");
+      }
+      break;
+
+    case 5:
+      if(fen_turns_parse(&position->turns, string) != 0)
+      {
+        error_print("Failed to parse fen turns");
+      }
+      break;
+
+    default:
+      break;
+  }
+}
+
+/*
+ * Parse fen string
+ *
+ * RETURN (int status)
+ * - 0 | Success
+ * - 1 | Failed to split fen string
+ */
+int fen_parse(Position* position, const char* fen_string)
+{
+  info_print("Parsing fen (%s)", fen_string);
+
+  char* string_array[6];
+
+  size_t split_count = 0;
+
+  if((split_count = string_split_at_delim(string_array, fen_string, " ", 6)) < 4)
+  {
+    error_print("Failed to split fen string");
+
+    string_array_free(string_array, split_count);
+
+    return 1;
+  }
+
+  for(int index = 0; index < split_count; index++)
+  {
+    fen_index_part_parse(position, index, string_array[index]);
+  }
+
+  string_array_free(string_array, split_count);
 
 
-  position->side = SIDE_WHITE;
-
-  position->castle = 0;
-
-  position->passant = SQUARE_NONE;
-
-
-  int stringLength = strlen(fenString);
-
-  char stringArray[6][128];
-
-  if(!string_split_at_delim(stringArray, fenString, stringLength, " ", 6)) return false;
-
-
-  if(!fen_boards_parse(position->boards, stringArray[0])) return false;
-
-  if(!fen_side_parse(&position->side, stringArray[1])) return false;
-
-  if(!fen_castle_parse(&position->castle, stringArray[2])) return false;
-
-  if(!fen_passant_parse(&position->passant, stringArray[3])) return false;
-
-  if(!fen_clock_parse(&position->clock, stringArray[4])) return false;
-
-  if(!fen_turns_parse(&position->turns, stringArray[5])) return false;
+  memset(position->covers, 0ULL, sizeof(U64) * 3);
 
 
   for(Piece piece = PIECE_WHITE_PAWN; piece <= PIECE_WHITE_KING; piece++)
@@ -211,5 +340,7 @@ bool fen_parse(Position* position, const char fenString[])
   position->covers[SIDE_BOTH] = position->covers[SIDE_WHITE] | position->covers[SIDE_BLACK];
 
 
-  return true;
+  info_print("Parsed fen");
+
+  return 0;
 }

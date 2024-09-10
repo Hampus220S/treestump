@@ -12,12 +12,9 @@
 extern const char* FEN_START;
 
 
-extern bool fen_parse(Position* position, const char fenString[]);
+extern int fen_parse(Position* position, const char* fen_string);
 
-extern int  uci_parse(Position* position, const char* uci_string);
-
-
-extern bool string_split_at_delim(char (*stringArray)[128], const char string[], int length, const char delim[], int amount);
+extern int uci_parse(Position* position, const char* uci_string);
 
 
 extern char* move_string_create(char* string, Move move);

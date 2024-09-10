@@ -62,28 +62,3 @@ char* move_string_create(char* string, Move move)
 
   return string;
 }
-
-/*
- * Split a string at deliminator into multiple smaller string parts
- */
-bool string_split_at_delim(char (*stringArray)[128], const char string[], int length, const char delim[], int amount)
-{
-  if(amount < 1) return false;
-
-  char stringCopy[length + 1]; 
-  strcpy(stringCopy, string);
-
-  char* stringToken = NULL;
-  
-  if((stringToken = strtok(stringCopy, delim)) == NULL) return false;
-
-  for(int index = 0; index < amount; index += 1)
-  {
-    strcpy(stringArray[index], stringToken);
-
-    if(index == (amount - 1)) stringToken = strtok(NULL, delim);
-
-    else if((stringToken = strtok(NULL, delim)) == NULL) return false;
-  }
-  return true;
-}
