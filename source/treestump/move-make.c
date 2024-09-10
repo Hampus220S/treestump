@@ -1,5 +1,8 @@
 /*
  * Make move in position
+ * excpected that the move is legal and valid
+ *
+ * This function just executes, and does not validate
  *
  * Written by Hampus Fridholm
  *
@@ -82,6 +85,8 @@ static void position_pawn_promote(Position* position, Piece pawn_piece, Square p
 
 /*
  * Castle the king and his rook
+ *
+ * Increase 50-move counter - no capture nor pawn move
  */
 static void move_castle_make(Position* position, Move move)
 {
@@ -102,10 +107,16 @@ static void move_castle_make(Position* position, Move move)
 
   // 3. Clear the castling rights for the side that castled
   position->castle &= (king_piece == PIECE_WHITE_KING) ? ~CASTLE_WHITE : ~CASTLE_BLACK;
+
+  position->clock++;
+
+  position->passant = SQUARE_NONE;
 }
 
 /*
  * Make a normal move, not capturing anything
+ *
+ * Increase 50-move counter - no capture nor pawn move
  */
 static void move_normal_quiet_make(Position* position, Move move)
 {
@@ -116,28 +127,7 @@ static void move_normal_quiet_make(Position* position, Move move)
 
   position_piece_move(position, piece, source, target);
 
-  // Check what this is doing here...
   position->clock++;
-}
-
-/*
- * Capture one of the opponents pieces
- */
-static void move_normal_capture_make(Position* position, Move move)
-{
-  Square source_square = MOVE_SOURCE_GET(move);
-  Square target_square = MOVE_TARGET_GET(move);
-
-  Piece piece = MOVE_PIECE_GET(move);
-
-  // 1. Pick up the piece that is beging captured
-  position_square_piece_pick_up(position, target_square);
-
-  // 2. Move the attacking piece to its square
-  position_piece_move(position, piece, source_square, target_square);
-
-  // 3. Reset the clock, because a capture was made
-  position->clock = 0;
 }
 
 /*
@@ -173,7 +163,37 @@ static void castle_clear_for_capture_piece(Position* position, Move move)
 }
 
 /*
+ * Capture one of the opponents pieces
+ *
+ * If a rook is being captured, remove its castling rights
+ *
+ * Reset the 50-move counter - a capture was made
+ */
+static void move_normal_capture_make(Position* position, Move move)
+{
+  Square source_square = MOVE_SOURCE_GET(move);
+  Square target_square = MOVE_TARGET_GET(move);
+
+  Piece piece = MOVE_PIECE_GET(move);
+
+  // 1. Pick up the piece that is beging captured
+  position_square_piece_pick_up(position, target_square);
+
+  // 2. Move the attacking piece to its square
+  position_piece_move(position, piece, source_square, target_square);
+
+  // 3. Remove the potential rook's castling rights
+  castle_clear_for_capture_piece(position, move);
+
+  position->clock = 0;
+}
+
+/*
  * Make a normal move, either a capture or a quiet move
+ *
+ * If a rook or a king is moving, remove its castling rights
+ *
+ * These moves resets the enpassant opportunity
  */
 static void move_normal_make(Position* position, Move move)
 {
@@ -186,25 +206,45 @@ static void move_normal_make(Position* position, Move move)
     move_normal_quiet_make(position, move);
   }
 
+  // 2. Remove potential rook's / king's castling rights
   castle_clear_for_moving_piece(position, move);
+
+  position->passant = SQUARE_NONE;
 }
 
 /*
+ * This macro has 2 use cases
+ *
+ * 1. For getting the enpassant square of double jumping pawn
+ *  - Get the enpassant square which has been jumped over
+ *
+ * 2. For getting the square of double jumped opponent pawn
+ *  - Get the square which the opponent pawn is standing on
+ */
+#define PASSANT_SQUARE_GET(PIECE, SQUARE) (((PIECE) == PIECE_WHITE_PAWN) ? ((SQUARE) + BOARD_FILES) : ((SQUARE) - BOARD_FILES))
+
+/*
  * Make a pawn move - capturing the oppontens enpassant pawn
+ *
+ * This move resets the enpassant opportunity
  */
 static void move_pawn_passant_make(Position* position, Move move)
 {
   Square source_square = MOVE_SOURCE_GET(move);
   Square target_square = MOVE_TARGET_GET(move);
 
-  Piece piece = MOVE_PIECE_GET(move);
+  Piece pawn_piece = MOVE_PIECE_GET(move);
 
-  position_square_piece_pick_up(position, position->passant);
+  Square enemy_pawn_square = PASSANT_SQUARE_GET(pawn_piece, position->passant);
 
-  position_piece_move(position, piece, source_square, target_square);
+  // 1. Pick up the enemy pawn next to enpassant square
+  position_square_piece_pick_up(position, enemy_pawn_square);
+
+  // 2. Move pawn
+  position_piece_move(position, pawn_piece, source_square, target_square);
+
+  position->passant = SQUARE_NONE;
 }
-
-#define PASSANT_SQUARE_GET(PIECE, SQUARE) (((PIECE) == PIECE_WHITE_PAWN) ? ((SQUARE) - BOARD_FILES) : ((SQUARE) + BOARD_FILES))
 
 /*
  * Make a pawn move - double jumping in the start
@@ -218,9 +258,10 @@ static void move_pawn_double_make(Position* position, Move move)
 
   Piece pawn_piece = MOVE_PIECE_GET(move);
 
+  // 1. Move the pawn two steps forward (double jump)
   position_piece_move(position, pawn_piece, source_square, target_square);
 
-  position->passant = PASSANT_SQUARE_GET(pawn_piece, source_square);
+  position->passant = PASSANT_SQUARE_GET(pawn_piece, target_square);
 }
 
 /*
@@ -234,11 +275,14 @@ static void move_pawn_promote_quiet_make(Position* position, Move move)
   Piece  promote_piece  = MOVE_PROMOTE_GET(move);
   Square promote_square = MOVE_TARGET_GET(move);
 
+  // 1. Pick up pawn and place down promote piece
   position_pawn_promote(position, pawn_piece, pawn_square, promote_piece, promote_square);
 }
 
 /*
  * Make a pawn move - promote and capture opponents piece
+ *
+ * If a rook is being captured, remove its castling rights
  */
 static void move_pawn_promote_capture_make(Position* position, Move move)
 {
@@ -248,13 +292,20 @@ static void move_pawn_promote_capture_make(Position* position, Move move)
   Piece  promote_piece  = MOVE_PROMOTE_GET(move);
   Square promote_square = MOVE_TARGET_GET(move);
 
+  // 1. Pick up the piece that is beging captured
   position_square_piece_pick_up(position, promote_square);
 
+  // 2. Pick up pawn and place down promote piece
   position_pawn_promote(position, pawn_piece, pawn_square, promote_piece, promote_square);
+
+  // 3. Remove the potential rook's castling rights
+  castle_clear_for_capture_piece(position, move);
 } 
 
 /*
  * Make a pawn move - promote with either capture or quiet move
+ *
+ * These moves resets the enpassant opportunity
  */
 static void move_pawn_promote_make(Position* position, Move move)
 {
@@ -267,40 +318,48 @@ static void move_pawn_promote_make(Position* position, Move move)
     move_pawn_promote_quiet_make(position, move);
   }
 
-  // This is made for both cases of promote moves
-  // position->passant = PIECE_NONE;
+  position->passant = SQUARE_NONE;
 }
 
 /*
- *
+ * Make a normal pawn move - without capturing any piece
  */
 static void move_pawn_normal_quiet_make(Position* position, Move move)
 {
   Square source_square = MOVE_SOURCE_GET(move);
   Square target_square = MOVE_TARGET_GET(move);
 
-  Piece piece = MOVE_PIECE_GET(move);
+  Piece pawn_piece = MOVE_PIECE_GET(move);
 
-  position_piece_move(position, piece, source_square, target_square);
+  position_piece_move(position, pawn_piece, source_square, target_square);
 }
 
 /*
+ * Make a normal pawn move - capture another piece
  *
+ * If a rook is being captured, remove its castling rights
  */
 static void move_pawn_normal_capture_make(Position* position, Move move)
 {
   Square source_square = MOVE_SOURCE_GET(move);
   Square target_square = MOVE_TARGET_GET(move);
 
-  Piece piece = MOVE_PIECE_GET(move);
+  Piece pawn_piece = MOVE_PIECE_GET(move);
 
+  // 1. Pick up the piece that is beging captured
   position_square_piece_pick_up(position, target_square);
 
-  position_piece_move(position, piece, source_square, target_square);
+  // 2. Move the attacking pawn to its square
+  position_piece_move(position, pawn_piece, source_square, target_square);
+
+  // 3. Remove the potential rook's castling rights
+  castle_clear_for_capture_piece(position, move);
 }
 
 /*
+ * Make a normal pawn move - either a capture or a quiet move
  *
+ * These moves resets the enpassant opportunity
  */
 static void move_pawn_normal_make(Position* position, Move move)
 {
@@ -313,12 +372,13 @@ static void move_pawn_normal_make(Position* position, Move move)
     move_pawn_normal_quiet_make(position, move);
   }
 
-  // This is made for both pawn normal moves
-  // position->passant = PIECE_NONE;
+  position->passant = SQUARE_NONE;
 }
 
 /*
+ * Make a pawn move
  *
+ * Reset the 50-move counter - a pawn is moving
  */
 static void move_pawn_make(Position* position, Move move)
 {
@@ -339,7 +399,6 @@ static void move_pawn_make(Position* position, Move move)
     move_pawn_normal_make(position, move);
   }
 
-  // This is made for every pawn move
   position->clock = 0;
 }
 
@@ -348,17 +407,17 @@ static void move_pawn_make(Position* position, Move move)
  * excpected that the move is legal and valid
  *
  * This function just executes, and does not validate
+ *
+ *
+ * Switch moving side
+ *
+ * If black made the move, another whole move has been made
  */
 void move_make(Position* position, Move move)
 {
-  position->clock++;
+  Piece piece = MOVE_PIECE_GET(move);
 
-  position->passant = SQUARE_NONE;
-
-  Piece sourcePiece = MOVE_PIECE_GET(move);
-
-  // 2. Make more specific things based on type of move
-  if(sourcePiece == PIECE_WHITE_PAWN || sourcePiece == PIECE_BLACK_PAWN)
+  if(piece == PIECE_WHITE_PAWN || piece == PIECE_BLACK_PAWN)
   {
     move_pawn_make(position, move);
   }
@@ -371,12 +430,7 @@ void move_make(Position* position, Move move)
     move_normal_make(position, move);
   }
 
-  // If a rook is being captured, remove its castling rights
-  castle_clear_for_capture_piece(position, move);
-
-  // If black made the move, a new turn has been made
   if(position->side == SIDE_BLACK) position->turns++;
 
-  // Switch sides
   position->side = !position->side;
 }

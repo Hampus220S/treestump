@@ -3,7 +3,6 @@
 * extract square score from files intead of hard coded values
 * Rename functions from convention (_create, _free, object_verb)
 * Add '=' symbol to BOARD_SQUARE_SET/GET/POP (skip the assignment part) (if it works everywhere)
-* Reuse move_..._make functions for ex pawn moves
 
 * refactore code in move_legal (make it more effective without repeating code validation)
 

@@ -61,11 +61,11 @@ typedef struct
 {
   U64     boards[12];
   U64     covers[3];
-  Side    side;
-  Square  passant;
-  Castle  castle;
-  int     clock;
-  int     turns;
+  Side    side;       // side to move
+  Square  passant;    // enpassant square
+  Castle  castle;     // castling rights
+  int     clock;      // 50-move counter
+  int     turns;      // number of whole moves
 } Position;
 
 #include "treestump/piece.h"
