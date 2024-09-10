@@ -156,7 +156,7 @@ static int board_score_get(U64 boards[12])
 
     while(bitboard)
     {
-      Square square = board_ls1b_index(bitboard);
+      Square square = board_first_square_get(bitboard);
 
       boardScore += piece_score_get(piece);
       boardScore += square_score_get(piece, square);

@@ -26,7 +26,7 @@ typedef enum
   PIECE_NONE
 } Piece;
 
-#define PIECE_SIDE_GET(PIECE) ((PIECE >= PIECE_WHITE_PAWN && PIECE <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK)
+#define PIECE_SIDE_GET(PIECE) (((PIECE) >= PIECE_WHITE_PAWN && (PIECE) <= PIECE_WHITE_KING) ? SIDE_WHITE : SIDE_BLACK)
 
 // Remove extern from this, and create getter like for attacks
 extern U64 BOARD_LINES[BOARD_SQUARES][BOARD_SQUARES];

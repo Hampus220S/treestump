@@ -144,6 +144,7 @@ int main(int argc, char* argv[])
 
   signals_handler_setup();
 
+
   info_print("Start of main");
 
   all_init();

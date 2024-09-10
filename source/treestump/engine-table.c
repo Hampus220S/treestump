@@ -61,7 +61,7 @@ U64 create_hash_key(Position position)
 
     while(bitboard)
     {
-      Square square = board_ls1b_index(bitboard);
+      Square square = board_first_square_get(bitboard);
 
       hashKey ^= PIECE_HASH_KEYS[piece][square];
 

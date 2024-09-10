@@ -20,7 +20,7 @@ U64 index_cover_create(int index, U64 attackMask, int bitAmount)
 
   for(int amount = 0; amount < bitAmount; amount++)
   {
-    int square = board_ls1b_index(attackMask);
+    int square = board_first_square_get(attackMask);
 
     attackMask = BOARD_SQUARE_POP(attackMask, square);
 
@@ -114,6 +114,14 @@ U64 attacks_rook_create(Square square, U64 cover)
 }
 
 /*
+ *
+ */
+static int magic_index_create(U64 cover, U64 magic_number, int relevant_bits)
+{
+  return ((cover * magic_number) >> (BOARD_SQUARES - relevant_bits));
+}
+
+/*
  * Initialize lookup attacks for a rook
  * at every square and with every case of cover
  */
@@ -164,6 +172,8 @@ static void attacks_bishop_init(void)
  */
 void attacks_init(void)
 {
+  info_print("Initializing attacks");
+
   attacks_rook_init();
 
   attacks_bishop_init();

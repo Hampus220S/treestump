@@ -101,9 +101,9 @@ int negamax(Position position, int depth, int nodes, int alpha, int beta)
     // Put this in a new function
     U64 kingBoard = (position.side == SIDE_WHITE) ? position.boards[PIECE_WHITE_KING] : position.boards[PIECE_BLACK_KING];
 
-    Square kingSquare = board_ls1b_index(kingBoard);
+    Square kingSquare = board_first_square_get(kingBoard);
 
-    if(kingSquare == -1 || square_is_attacked(position, kingSquare, !position.side))
+    if(kingSquare == SQUARE_NONE || square_is_attacked(position, kingSquare, !position.side))
     {
       return -49000 + depth;
     }

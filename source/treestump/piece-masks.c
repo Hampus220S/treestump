@@ -150,6 +150,8 @@ static U64 mask_rook_create(Square square)
  */
 void masks_init(void)
 {
+  info_print("Initializing masks");
+
   for (Square square = 0; square < BOARD_SQUARES; square++)
   {
     MASKS_PAWN[SIDE_WHITE][square] = mask_pawn_create  (square, SIDE_WHITE);
@@ -171,10 +173,12 @@ void masks_init(void)
  */
 void relevant_bits_init(void)
 {
+  info_print("Initializing relevant bits");
+
   for (Square square = 0; square < BOARD_SQUARES; square++)
   {
-    RELEVANT_BITS_BISHOP[square] = board_bit_amount(MASKS_BISHOP[square]);
+    RELEVANT_BITS_BISHOP[square] = board_bit_amount_get(MASKS_BISHOP[square]);
 
-    RELEVANT_BITS_ROOK  [square] = board_bit_amount(MASKS_ROOK  [square]);
+    RELEVANT_BITS_ROOK  [square] = board_bit_amount_get(MASKS_ROOK  [square]);
   }
 }

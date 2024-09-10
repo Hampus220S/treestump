@@ -12,11 +12,13 @@
 extern void board_lines_init(void);
 
 
-extern int board_bit_amount(U64 bitboard);
+extern int    board_bit_amount_get(U64 bitboard);
 
-extern int board_ls1b_index(U64 bitboard);
+extern Square board_first_square_get(U64 bitboard);
+
 
 extern void position_print(Position position);
+
 
 extern Piece square_piece_get(U64 boards[12], Square square);
 

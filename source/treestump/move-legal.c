@@ -378,8 +378,8 @@ static bool move_is_pseudo_legal(Position position, Move move)
 {
   Piece sourcePiece = MOVE_PIECE_GET(move);
 
-  if((sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING) && position.side != SIDE_WHITE) return false;
-  if((sourcePiece >= PIECE_BLACK_PAWN && sourcePiece <= PIECE_BLACK_KING) && position.side != SIDE_BLACK) return false;
+  if(PIECE_SIDE_GET(sourcePiece) != position.side) return false;
+
 
   if((sourcePiece == PIECE_WHITE_PAWN) || (sourcePiece == PIECE_BLACK_PAWN))
   {
@@ -406,13 +406,13 @@ bool move_is_legal(Position position, Move move)
 
   move_make(&movedPosition, move);
 
-
+  // New: SIDE_KING_PIECE_GET
   Piece kingPiece = (movedPosition.side == SIDE_WHITE) ? PIECE_BLACK_KING : PIECE_WHITE_KING;
 
-  Square kingSquare = board_ls1b_index(movedPosition.boards[kingPiece]);
+  Square kingSquare = board_first_square_get(movedPosition.boards[kingPiece]);
 
   // The king should always exists, but if it don't return false
-  if(kingSquare == -1) return false;
+  if(kingSquare == SQUARE_NONE) return false;
 
   return !square_is_attacked(movedPosition, kingSquare, movedPosition.side);
 }

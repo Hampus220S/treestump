@@ -16,13 +16,11 @@ extern U64 MASKS_KING   [BOARD_SQUARES];
 extern int RELEVANT_BITS_BISHOP[BOARD_SQUARES];
 extern int RELEVANT_BITS_ROOK  [BOARD_SQUARES];
 
-extern U64 MAGIC_NUMBERS_BISHOP[BOARD_SQUARES];
-extern U64 MAGIC_NUMBERS_ROOK  [BOARD_SQUARES];
+extern const U64 MAGIC_NUMBERS_BISHOP[BOARD_SQUARES];
+extern const U64 MAGIC_NUMBERS_ROOK  [BOARD_SQUARES];
+
 
 extern U64 index_cover_create(int index, U64 attackMask, int bitAmount);
-
-extern int magic_index_create(U64 cover, U64 magic_number, int relevant_bits);
-
 
 extern U64 attacks_bishop_create(Square square, U64 block);
 

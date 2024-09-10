@@ -148,7 +148,7 @@ static void moves_white_normal_create(MoveArray* moveArray, Position position, S
 
   while(attackBoard)
   {
-    Square targetSquare = board_ls1b_index(attackBoard);
+    Square targetSquare = board_first_square_get(attackBoard);
 
     Move move = move_normal_create(position.boards, sourceSquare, targetSquare, piece);
     
@@ -169,7 +169,7 @@ static void moves_white_create(MoveArray* moveArray, Position position)
 
     while(pieceBoard)
     {
-      Square sourceSquare = board_ls1b_index(pieceBoard);
+      Square sourceSquare = board_first_square_get(pieceBoard);
 
       if(piece == PIECE_WHITE_PAWN)
       {
@@ -199,7 +199,7 @@ static void moves_black_normal_create(MoveArray* moveArray, Position position, S
 
   while(attackBoard)
   {
-    Square targetSquare = board_ls1b_index(attackBoard);
+    Square targetSquare = board_first_square_get(attackBoard);
 
     Move move = move_normal_create(position.boards, sourceSquare, targetSquare, piece);
     
@@ -220,7 +220,7 @@ static void moves_black_create(MoveArray* moveArray, Position position)
 
     while(pieceBoard)
     {
-      Square sourceSquare = board_ls1b_index(pieceBoard);
+      Square sourceSquare = board_first_square_get(pieceBoard);
 
       if(piece == PIECE_BLACK_PAWN)
       {
@@ -245,7 +245,7 @@ void moves_create(MoveArray* moveArray, Position position)
   {
     moves_white_create(moveArray, position);
   }
-  else if(position.side == SIDE_BLACK)
+  else
   {
     moves_black_create(moveArray, position);
   }

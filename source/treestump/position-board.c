@@ -70,6 +70,8 @@ static U64 board_line_create(Square source, Square target)
  */
 void board_lines_init(void)
 {
+  info_print("Initializing board lines");
+
   for(Square sourceSquare = A8; sourceSquare <= H1; sourceSquare++)
   {
     for(Square targetSquare = A8; targetSquare <= H1; targetSquare++)
@@ -84,7 +86,7 @@ void board_lines_init(void)
 /*
  *
  */
-int board_bit_amount(U64 bitboard)
+int board_bit_amount_get(U64 bitboard)
 {
   int amount;
 
@@ -96,11 +98,14 @@ int board_bit_amount(U64 bitboard)
   return amount;
 }
 
-int board_ls1b_index(U64 bitboard)
+/*
+ *
+ */
+Square board_first_square_get(U64 bitboard)
 {
-  if(!bitboard) return -1;
+  if(!bitboard) return SQUARE_NONE;
 
-  return board_bit_amount((bitboard & -bitboard) - 1);
+  return board_bit_amount_get((bitboard & -bitboard) - 1);
 }
 
 /*

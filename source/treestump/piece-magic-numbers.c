@@ -6,75 +6,7 @@
 
 #include "../treestump.h"
 
-#include "piece-intern.h"
-
-extern U64 random_U64(void);
-
-#define MAGIC_NUMBER_CREATE() (random_U64() & random_U64() & random_U64())
-
-/*
- *
- */
-int magic_index_create(U64 cover, U64 magic_number, int relevant_bits)
-{
-  return ((cover * magic_number) >> (BOARD_SQUARES - relevant_bits));
-}
-
-/*
- *
- */
-U64 generate_covers_magic_number(U64 covers[4096], int relevantBits, U64 attacks[4096], U64 attackMask)
-{
-  U64 usedAttacks[4096];
-
-  int coverIndicies = 1 << relevantBits;
-
-  for (int count = 0; count < 100000000; count++)
-  {
-    U64 magicNumber = MAGIC_NUMBER_CREATE();
-
-    if (board_bit_amount((attackMask * magicNumber) & 0xFF00000000000000) < 6) continue;
-
-    memset(usedAttacks, 0ULL, sizeof(usedAttacks));
-
-    bool fail = false;
-
-    for(int index = 0; !fail && index < coverIndicies; index++)
-    {
-      int magicIndex = magic_index_create(covers[index], magicNumber, relevantBits);
-
-      if(!usedAttacks[magicIndex]) usedAttacks[magicIndex] = attacks[index];
-
-      else if (usedAttacks[magicIndex] != attacks[index]) fail = true;
-    }
-    if (!fail) return magicNumber;
-  }
-  return 0ULL;
-}
-
-/*
- * Rename this function and break it up into bishop and rook functions
- */
-U64 generate_square_magic_number(Square square, int relevantBits, bool bishop)
-{
-  U64 covers[4096];
-
-  U64 attacks[4096];
-
-  U64 attackMask = bishop ? MASKS_BISHOP[square] : MASKS_ROOK[square];
-
-  int coverIndicies = 1 << relevantBits;
-
-  for (int index = 0; index < coverIndicies; index++)
-  {
-    covers[index] = index_cover_create(index, attackMask, relevantBits);
-
-    attacks[index] = bishop ? attacks_bishop_create(square, covers[index]) : attacks_rook_create(square, covers[index]);
-  }
-  return generate_covers_magic_number(covers, relevantBits, attacks, attackMask);
-}
-
-U64 MAGIC_NUMBERS_ROOK[BOARD_SQUARES] = 
+const U64 MAGIC_NUMBERS_ROOK[BOARD_SQUARES] = 
 {
   0x8a80104000800020ULL,
   0x140002000100040ULL,
@@ -142,7 +74,7 @@ U64 MAGIC_NUMBERS_ROOK[BOARD_SQUARES] =
   0x1004081002402ULL
 };
 
-U64 MAGIC_NUMBERS_BISHOP[BOARD_SQUARES] = {
+const U64 MAGIC_NUMBERS_BISHOP[BOARD_SQUARES] = {
   0x40040844404084ULL,
   0x2004208a004208ULL,
   0x10190041080202ULL,
@@ -208,16 +140,3 @@ U64 MAGIC_NUMBERS_BISHOP[BOARD_SQUARES] = {
   0x8918844842082200ULL,
   0x4010011029020020ULL
 };
-
-/*
- *
- */
-void magic_numbers_init(void)
-{
-  for(Square square = 0; square < BOARD_SQUARES; square++)
-  {
-    MAGIC_NUMBERS_ROOK  [square] = generate_square_magic_number(square, RELEVANT_BITS_ROOK  [square], false);
-
-    MAGIC_NUMBERS_BISHOP[square] = generate_square_magic_number(square, RELEVANT_BITS_BISHOP[square], true);
-  }
-}
