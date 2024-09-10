@@ -6,6 +6,8 @@
 
 #include "../treestump.h"
 
+#include "uci-intern.h"
+
 /*
  *
  */

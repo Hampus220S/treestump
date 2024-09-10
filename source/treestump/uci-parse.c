@@ -6,6 +6,8 @@
 
 #include "../treestump.h"
 
+#include "uci-intern.h"
+
 /*
  *
  */
@@ -262,6 +264,18 @@ int uci_parse(Position* position, const char* uci_string)
   else if(strcmp(uci_string, "d") == 0)
   {
     position_print(*position);
+
+    for(Piece piece = PIECE_WHITE_PAWN; piece <= PIECE_BLACK_KING; piece++)
+    {
+      printf("piece: %c\n", PIECE_SYMBOLS[piece]);
+      bitboard_print(position->boards[piece]);
+    }
+
+    for(Side side = SIDE_WHITE; side <= SIDE_BOTH; side++)
+    {
+      printf("side: %c\n", SIDE_SYMBOLS[side]);
+      bitboard_print(position->covers[side]);
+    }
   }
   else if(strncmp(uci_string, "isready", 7) == 0)
   {

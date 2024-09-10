@@ -20,6 +20,8 @@ const char* SQUARE_STRINGS[BOARD_SQUARES] =
 
 const char PIECE_SYMBOLS[12] = {'P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k'};
 
+const char SIDE_SYMBOLS[2] = {'w', 'b'};
+
 const Piece SYMBOL_PIECES[] =
 {
   ['P'] = PIECE_WHITE_PAWN,

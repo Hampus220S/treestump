@@ -11,12 +11,6 @@
 
 extern const char* FEN_START;
 
-extern const Piece SYMBOL_PIECES[];
-
-extern const char* SQUARE_STRINGS[BOARD_SQUARES];
-
-extern const char PIECE_SYMBOLS[12];
-
 
 extern bool fen_parse(Position* position, const char fenString[]);
 

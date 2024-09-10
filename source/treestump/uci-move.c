@@ -6,6 +6,8 @@
 
 #include "../treestump.h"
 
+#include "uci-intern.h"
+
 /*
  * Parse a square string, ex e4, to a square object
  */
