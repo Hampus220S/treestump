@@ -19,9 +19,3 @@ Future
 * Implement one thread for handling stdin and one thread for handling stdout (thinking)
 * Implement SIGUSR1 between threads
 * Implement SIGINT signal handler
-
-Improvement:
-- instead of checking if all 3 types of step forward are legal for pawn,
-  check only forward step,
-  AND toghether pawn attack lookup board and enemy cover to get possible squares to attack for pawn.
-  This will save move_is_legal calls

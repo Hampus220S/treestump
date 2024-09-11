@@ -61,22 +61,53 @@ static void moves_white_pawn_promote_create(MoveArray* move_array, Position posi
 }
 
 /*
+ * Create one of two capture moves for a white pawn
+ *
+ * If no attacks exist, no capture move is created
+ */
+static void move_white_pawn_capture_create(MoveArray* move_array, Position position, Square pawn_square, U64* attacks)
+{
+  if(!(*attacks)) return;
+
+  Square target_square = board_first_square_get(*attacks);
+
+
+  Move move = move_normal_create(position, pawn_square, target_square, PIECE_WHITE_PAWN);
+
+  if(target_square == position.passant) move |= MOVE_MASK_PASSANT;
+
+  move_add_if_legal(move_array, position, move);
+
+
+  *attacks = BOARD_SQUARE_POP(*attacks, target_square);
+}
+
+/*
  * Create legal moves for a white pawn, that do not promote
  */
 static void moves_white_pawn_other_create(MoveArray* move_array, Position position, Square pawn_square)
 {
-  for(Square target_square = (pawn_square - 9); target_square <= (pawn_square - 7); target_square++)
+  Move move = move_normal_create(position, pawn_square, pawn_square - BOARD_FILES, PIECE_WHITE_PAWN);
+
+  move_add_if_legal(move_array, position, move);
+
+  // Get attack squares by looking up pawn attacks and
+  // checking if a black piece is there
+  U64 attacks = attacks_pawn_get(pawn_square, SIDE_WHITE);
+
+  // If the pawn is not on 5th rank,
+  // exclude all squares where there are no black pieces
+  if(!(pawn_square >= A5 && pawn_square <= H5))
   {
-    Move move = move_normal_create(position, pawn_square, target_square, PIECE_WHITE_PAWN);
-
-    if(target_square == position.passant)
-    {
-      move |= MOVE_MASK_PASSANT;
-    }
-
-    move_add_if_legal(move_array, position, move);
+    attacks &= position.covers[SIDE_BLACK];
   }
 
+  move_white_pawn_capture_create(move_array, position, pawn_square, &attacks);
+
+  move_white_pawn_capture_create(move_array, position, pawn_square, &attacks);
+
+
+  // If pawn is standing on 2nd rank, create double jump move
   if(pawn_square >= A2 && pawn_square <= H2)
   {
     Move move = move_double_create(pawn_square, pawn_square - (BOARD_FILES * 2), PIECE_WHITE_PAWN);
@@ -136,22 +167,53 @@ static void moves_black_pawn_promote_create(MoveArray* move_array, Position posi
 }
 
 /*
+ * Create one of two capture moves for a black pawn
+ *
+ * If no attacks exist, no capture move is created
+ */
+static void move_black_pawn_capture_create(MoveArray* move_array, Position position, Square pawn_square, U64* attacks)
+{
+  if(!(*attacks)) return;
+
+  Square target_square = board_first_square_get(*attacks);
+
+
+  Move move = move_normal_create(position, pawn_square, target_square, PIECE_BLACK_PAWN);
+
+  if(target_square == position.passant) move |= MOVE_MASK_PASSANT;
+
+  move_add_if_legal(move_array, position, move);
+
+
+  *attacks = BOARD_SQUARE_POP(*attacks, target_square);
+}
+
+/*
  * Create legal moves for a black pawn, that do not promote
  */
 static void moves_black_pawn_other_create(MoveArray* move_array, Position position, Square pawn_square)
 {
-  for(Square target_square = (pawn_square + 7); target_square <= (pawn_square + 9); target_square++)
+  Move move = move_normal_create(position, pawn_square, pawn_square + BOARD_FILES, PIECE_BLACK_PAWN);
+
+  move_add_if_legal(move_array, position, move);
+
+  // Get attack squares by looking up pawn attacks and
+  // checking if a black piece is there
+  U64 attacks = attacks_pawn_get(pawn_square, SIDE_BLACK);
+
+  // If the pawn is not on 4th rank,
+  // exclude all squares where there are no white pieces
+  if(!(pawn_square >= A4 && pawn_square <= H4))
   {
-    Move move = move_normal_create(position, pawn_square, target_square, PIECE_BLACK_PAWN);
-
-    if(target_square == position.passant) 
-    {
-      move |= MOVE_MASK_PASSANT;
-    }
-
-    move_add_if_legal(move_array, position, move);
+    attacks &= position.covers[SIDE_WHITE];
   }
 
+  move_black_pawn_capture_create(move_array, position, pawn_square, &attacks);
+
+  move_black_pawn_capture_create(move_array, position, pawn_square, &attacks);
+
+
+  // If pawn is standing on 7th rank, create double jump move
   if(pawn_square >= A7 && pawn_square <= H7)
   {
     Move move = move_double_create(pawn_square, pawn_square + (BOARD_FILES * 2), PIECE_BLACK_PAWN);

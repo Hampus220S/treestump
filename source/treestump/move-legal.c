@@ -109,7 +109,7 @@ static bool move_pawn_passant_black_is_pseudo_legal(Position position, Move move
   // Check so pawn is standing on 4th rank
   if(!((source_square >= A4) && (source_square <= H4))) return false;
 
-  // Check so passant square is on 3th rank
+  // Check so passant square is on 3rd rank
   if(!((target_square >= A3) && (target_square <= H3))) return false;
 
   // Check so pawn is move one step forward to the side

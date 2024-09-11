@@ -44,7 +44,11 @@ static void uci_go_parse(Position position, const char goString[])
   {
     int depth = atoi(goString + 6);
 
+    info_print("Start of perft");
+
     perft_test(position, depth);
+
+    info_print("End of perft");
 
     return;
   }
@@ -120,8 +124,9 @@ static void uci_go_parse(Position position, const char goString[])
   }
 
   // printf("best_move(%d, %d, %d)\n", depth, nodes, movetime);
-
+  
   Move bestMove = best_move(position, depth, nodes, movetime, searchmoves);
+
 
   char moveString[8];
   move_string_create(moveString, bestMove);
