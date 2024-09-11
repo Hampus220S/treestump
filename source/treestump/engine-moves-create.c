@@ -51,7 +51,7 @@ static void moves_white_pawn_promote_create(MoveArray* move_array, Position posi
 
   for(Square promote_square = left_square; promote_square <= right_square; promote_square++)
   {
-    Move move = move_promote_create(position.boards, pawn_square, promote_square, PIECE_WHITE_PAWN, PIECE_WHITE_QUEEN);
+    Move move = move_promote_create(position, pawn_square, promote_square, PIECE_WHITE_PAWN, PIECE_WHITE_QUEEN);
 
     if(move_is_legal(position, move))
     {
@@ -67,7 +67,7 @@ static void moves_white_pawn_other_create(MoveArray* move_array, Position positi
 {
   for(Square target_square = (pawn_square - 9); target_square <= (pawn_square - 7); target_square++)
   {
-    Move move = move_normal_create(position.boards, pawn_square, target_square, PIECE_WHITE_PAWN);
+    Move move = move_normal_create(position, pawn_square, target_square, PIECE_WHITE_PAWN);
 
     if(target_square == position.passant)
     {
@@ -126,7 +126,7 @@ static void moves_black_pawn_promote_create(MoveArray* move_array, Position posi
 
   for(Square promote_square = left_square; promote_square <= right_square; promote_square++)
   {
-    Move move = move_promote_create(position.boards, pawn_square, promote_square, PIECE_BLACK_PAWN, PIECE_BLACK_QUEEN);
+    Move move = move_promote_create(position, pawn_square, promote_square, PIECE_BLACK_PAWN, PIECE_BLACK_QUEEN);
 
     if(move_is_legal(position, move))
     {
@@ -142,7 +142,7 @@ static void moves_black_pawn_other_create(MoveArray* move_array, Position positi
 {
   for(Square target_square = (pawn_square + 7); target_square <= (pawn_square + 9); target_square++)
   {
-    Move move = move_normal_create(position.boards, pawn_square, target_square, PIECE_BLACK_PAWN);
+    Move move = move_normal_create(position, pawn_square, target_square, PIECE_BLACK_PAWN);
 
     if(target_square == position.passant) 
     {
@@ -230,7 +230,7 @@ static void moves_normal_create(MoveArray* move_array, Position position, Square
   {
     Square target_square = board_first_square_get(target_board);
 
-    Move move = move_normal_create(position.boards, source_square, target_square, piece);
+    Move move = move_normal_create(position, source_square, target_square, piece);
     
     move_add_if_legal(move_array, position, move);
 

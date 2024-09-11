@@ -1,50 +1,32 @@
 /*
  * Written by Hampus Fridholm
  *
- * Last updated: 2024-09-09
+ * Last updated: 2024-09-11
  */
 
 #include "../treestump.h"
 
-// Rename this
-// Use covers instead of iterating boards
-bool ident_capture_move(U64 boards[12], Square targetSquare)
+/*
+ * Check if an enemy piece is standing on the target square
+ */
+static bool enemy_is_on_target_square(Position position, Piece piece, Square target_square)
 {
-  Piece targetPiece = square_piece_get(boards, targetSquare);
+  Side side = PIECE_SIDE_GET(piece);
 
-  return (targetPiece != PIECE_NONE);
+  return (position.covers[!side] & (1ULL << target_square));
 }
 
-// Rename this, and rewrite to be as simple as possible
-// Use covers instead of iterating boards
-bool ident_passant_move(U64 boards[12], Piece sourcePiece, Square sourceSquare, Square targetSquare)
-{
-  // Change this function, square_piece_get should not be used
-  Piece targetPiece = square_piece_get(boards, targetSquare);
-
-  if(targetPiece != PIECE_NONE) return false;
-
-  int squareDiff = (targetSquare - sourceSquare);
-
-  if(sourcePiece == PIECE_WHITE_PAWN)
-  {
-    if((squareDiff == -9) || (squareDiff == -7)) return true;
-  }
-  else if(sourcePiece == PIECE_BLACK_PAWN)
-  {
-    if((squareDiff == +9) || (squareDiff == +7)) return true;
-  }
-  return false;
-}
-
-Move move_double_create(Square sourceSquare, Square targetSquare, Piece piece)
+/*
+ * Create a double jump pawn move, with the right flags
+ */
+Move move_double_create(Square source_square, Square target_square, Piece pawn_piece)
 {
   Move move = MOVE_NONE;
 
-  move |= MOVE_SOURCE_SET(sourceSquare);
-  move |= MOVE_TARGET_SET(targetSquare);
+  move |= MOVE_SOURCE_SET(source_square);
+  move |= MOVE_TARGET_SET(target_square);
 
-  move |= MOVE_PIECE_SET(piece);
+  move |= MOVE_PIECE_SET(pawn_piece);
 
   move |= MOVE_MASK_DOUBLE;
 
@@ -53,35 +35,36 @@ Move move_double_create(Square sourceSquare, Square targetSquare, Piece piece)
 
 /*
  * Create a promote move, with the right flags
- *
- * RETURN (Move move)
  */
-Move move_promote_create(U64 boards[12], Square pawn_square, Square promote_square, Piece pawn_piece, Piece promote_piece)
+Move move_promote_create(Position position, Square pawn_square, Square promote_square, Piece pawn_piece, Piece promote_piece)
 {
   Move move = MOVE_NONE;
 
   move |= MOVE_SOURCE_SET(pawn_square);
   move |= MOVE_TARGET_SET(promote_square);
 
-  move |= MOVE_PIECE_SET(pawn_piece);
+  move |= MOVE_PIECE_SET  (pawn_piece);
   move |= MOVE_PROMOTE_SET(promote_piece);
 
-  if(ident_capture_move(boards, promote_square)) move |= MOVE_MASK_CAPTURE;
+  if(enemy_is_on_target_square(position, pawn_piece, promote_square))
+  {
+    move |= MOVE_MASK_CAPTURE;
+  }
 
   return move;
 }
 
 /*
- *
+ * Create a castling move, with the right flags
  */
-Move move_castle_create(Square sourceSquare, Square targetSquare, Piece piece)
+Move move_castle_create(Square source_square, Square target_square, Piece king_piece)
 {
   Move move = MOVE_NONE;
 
-  move |= MOVE_SOURCE_SET(sourceSquare);
-  move |= MOVE_TARGET_SET(targetSquare);
+  move |= MOVE_SOURCE_SET(source_square);
+  move |= MOVE_TARGET_SET(target_square);
 
-  move |= MOVE_PIECE_SET(piece);
+  move |= MOVE_PIECE_SET(king_piece);
 
   move |= MOVE_MASK_CASTLE;
 
@@ -89,56 +72,59 @@ Move move_castle_create(Square sourceSquare, Square targetSquare, Piece piece)
 }
 
 /*
- *
+ * Create a just normal move, either a capture or quiet move
  */
-Move move_normal_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece)
+Move move_normal_create(Position position, Square source_square, Square target_square, Piece piece)
 {
   Move move = MOVE_NONE;
 
-  move |= MOVE_SOURCE_SET(sourceSquare);
-  move |= MOVE_TARGET_SET(targetSquare);
+  move |= MOVE_SOURCE_SET(source_square);
+  move |= MOVE_TARGET_SET(target_square);
 
   move |= MOVE_PIECE_SET(piece);
 
-  if(ident_capture_move(boards, targetSquare)) move |= MOVE_MASK_CAPTURE;
+  if(enemy_is_on_target_square(position, piece, target_square))
+  {
+    move |= MOVE_MASK_CAPTURE;
+  }
 
   return move;
 }
 
 /*
- * This function does not care about rules.
+ * This function does not care about rules
  * It tries to identify special moves, and give them flags
  *
- * MOVE_MASK_DOUBLE  | A pawn does a double move
+ * MOVE_MASK_DOUBLE  | A pawn does a double jump move
  * MOVE_MASK_PASSANT | A pawn does enpassant
  * MOVE_MASK_CASTLE  | A king castles
  * MOVE_MASK_CAPTURE | A piece captures another piece
  */
-static Move move_flag_create(U64 boards[12], Piece sourcePiece, Square sourceSquare, Square targetSquare)
+static Move move_flag_create(Position position, Square source_square, Square target_square, Piece piece)
 {
-  if(sourcePiece == PIECE_WHITE_PAWN || sourcePiece == PIECE_BLACK_PAWN)
+  if(piece == PIECE_WHITE_PAWN || piece == PIECE_BLACK_PAWN)
   {
     // If the pawn moves 2 rows, it must be because it does a double move
-    if(abs(sourceSquare - targetSquare) == (BOARD_FILES * 2))
+    if(abs(source_square - target_square) == (BOARD_FILES * 2))
     {
       return MOVE_MASK_DOUBLE;
     }
 
-    if(ident_passant_move(boards, sourcePiece, sourceSquare, targetSquare))
+    if(target_square == position.passant)
     {
       return MOVE_MASK_PASSANT;
     }
   }
-  else if(sourcePiece == PIECE_WHITE_KING || sourcePiece == PIECE_BLACK_KING)
+  else if(piece == PIECE_WHITE_KING || piece == PIECE_BLACK_KING)
   {
     // If the king moves 2 columns, it must be because it castles
-    if(abs(targetSquare - sourceSquare) == 2)
+    if(abs(target_square - source_square) == 2)
     {
       return MOVE_MASK_CASTLE;
     }
   }
 
-  if(ident_capture_move(boards, targetSquare))
+  if(enemy_is_on_target_square(position, piece, target_square))
   {
     return MOVE_MASK_CAPTURE;
   }
@@ -156,32 +142,32 @@ static Move move_flag_create(U64 boards[12], Piece sourcePiece, Square sourceSqu
  *
  * Fix: Rename or refactor this function
  */
-static Move move_promote_piece_create(Piece sourcePiece, Square targetSquare, Piece promotePiece)
+static Move move_promote_piece_create(Piece piece, Square target_square, Piece promote_piece)
 {
-  if(sourcePiece == PIECE_WHITE_PAWN)
+  if(piece == PIECE_WHITE_PAWN)
   {
-    if(targetSquare >= A8 && targetSquare <= H8)
+    if(target_square >= A8 && target_square <= H8)
     {
       // Here, PIECE_WHITE_PAWN means no promote piece is specified
-      if(promotePiece == PIECE_WHITE_PAWN)
+      if(promote_piece == PIECE_WHITE_PAWN)
       {
-        promotePiece = PIECE_WHITE_QUEEN;
+        promote_piece = PIECE_WHITE_QUEEN;
       }
 
-      return MOVE_PROMOTE_SET(promotePiece);
+      return MOVE_PROMOTE_SET(promote_piece);
     }
   }
-  else if(sourcePiece == PIECE_BLACK_PAWN)
+  else if(piece == PIECE_BLACK_PAWN)
   {
-    if(targetSquare >= A1 && targetSquare <= H1)
+    if(target_square >= A1 && target_square <= H1)
     {
       // Here, PIECE_WHITE_PAWN means no promote piece is specified
-      if(promotePiece == PIECE_WHITE_PAWN)
+      if(promote_piece == PIECE_WHITE_PAWN)
       {
-        promotePiece = PIECE_BLACK_QUEEN;
+        promote_piece = PIECE_BLACK_QUEEN;
       }
 
-      return MOVE_PROMOTE_SET(promotePiece);
+      return MOVE_PROMOTE_SET(promote_piece);
     }
   }
 
@@ -191,19 +177,22 @@ static Move move_promote_piece_create(Piece sourcePiece, Square targetSquare, Pi
 /*
  * This function is not meant to create legal moves per say,
  * but to give the move the right information to possible be a legal move
+ *
+ * PARAMS
+ * - Piece promote_piece | Potential promote piece (can be PIECE_NONE)
  */
-Move move_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece promotePiece)
+Move move_create(Position position, Square source_square, Square target_square, Piece promote_piece)
 {
   Move move = MOVE_NONE;
 
-  Piece sourcePiece = square_piece_get(boards, sourceSquare);
+  Piece piece = square_piece_get(position.boards, source_square);
 
-  move |= MOVE_SOURCE_SET(sourceSquare);
-  move |= MOVE_TARGET_SET(targetSquare);
-  move |= MOVE_PIECE_SET(sourcePiece);
+  move |= MOVE_SOURCE_SET(source_square);
+  move |= MOVE_TARGET_SET(target_square);
+  move |= MOVE_PIECE_SET(piece);
 
-  move |= move_promote_piece_create(sourcePiece, targetSquare, promotePiece);
-  move |= move_flag_create(boards, sourcePiece, sourceSquare, targetSquare);
+  move |= move_promote_piece_create(piece, target_square, promote_piece);
+  move |= move_flag_create(position, source_square, target_square, piece);
 
   return move;
 }

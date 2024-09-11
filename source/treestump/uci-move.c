@@ -24,7 +24,7 @@ static Square square_string_parse(const char* string)
 /*
  * Parse a move string, ex e2e4, to a move object
  */
-Move move_string_parse(U64 boards[12], const char* string)
+Move move_string_parse(Position position, const char* string)
 {
   Square sourceSquare = square_string_parse(string += 0);
 
@@ -38,7 +38,7 @@ Move move_string_parse(U64 boards[12], const char* string)
   Piece promotePiece = SYMBOL_PIECES[(unsigned char) *string];
 
 
-  return move_create(boards, sourceSquare, targetSquare, promotePiece);
+  return move_create(position, sourceSquare, targetSquare, promotePiece);
 }
 
 /*

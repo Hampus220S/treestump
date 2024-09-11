@@ -11,7 +11,7 @@
 /*
  *
  */
-static MoveArray move_strings_parse(U64 boards[12], const char movesString[])
+static MoveArray move_strings_parse(Position position, const char movesString[])
 {
   MoveArray moveArray;
 
@@ -20,7 +20,7 @@ static MoveArray move_strings_parse(U64 boards[12], const char movesString[])
 
   while(*movesString)
   {
-    Move move = move_string_parse(boards, movesString);
+    Move move = move_string_parse(position, movesString);
 
     if(move != MOVE_NONE)
     {
@@ -64,7 +64,7 @@ static void uci_go_parse(Position position, const char goString[])
   if((string = strstr(goString, "searchmoves")))
   {
     // Search only on these moves
-    searchmoves = move_strings_parse(position.boards, goString + 12);
+    searchmoves = move_strings_parse(position, goString + 12);
   }
   if(!strncmp(goString, "ponder", 5))
   {
@@ -155,7 +155,7 @@ static Position uci_position_parse(const char positionString[])
 
     while(*movesString)
     {
-      Move move = move_string_parse(position.boards, movesString);
+      Move move = move_string_parse(position, movesString);
 
       if(move == MOVE_NONE) break;
 

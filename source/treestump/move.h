@@ -1,7 +1,7 @@
 /*
  * Written by Hampus Fridholm
  *
- * Last updated: 2024-09-08
+ * Last updated: 2024-09-11
  */
 
 #ifndef MOVE_H
@@ -40,15 +40,15 @@ extern const Move MOVE_NONE;
 extern void move_make(Position* position, Move move);
 
 
-extern Move move_double_create(Square sourceSquare, Square targetSquare, Piece piece);
+extern Move move_double_create(Square source_square, Square target_square, Piece pawn_piece);
 
-extern Move move_promote_create(U64 boards[12], Square pawn_square, Square promote_square, Piece pawn_piece, Piece promote_piece);
+extern Move move_promote_create(Position position, Square pawn_square, Square promote_square, Piece pawn_piece, Piece promote_piece);
 
-extern Move move_castle_create(Square sourceSquare, Square targetSquare, Piece piece);
+extern Move move_castle_create(Square source_square, Square target_square, Piece king_piece);
 
-extern Move move_normal_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece);
+extern Move move_normal_create(Position position, Square source_square, Square target_square, Piece piece);
 
-extern Move move_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece promotePiece);
+extern Move move_create(Position position, Square source_square, Square target_square, Piece promote_piece);
 
 
 extern bool move_is_legal(Position position, Move move);

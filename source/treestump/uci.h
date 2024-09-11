@@ -19,6 +19,6 @@ extern int uci_parse(Position* position, const char* uci_string);
 
 extern char* move_string_create(char* string, Move move);
 
-extern Move  move_string_parse(U64 boards[12], const char* string);
+extern Move  move_string_parse(Position position, const char* string);
 
 #endif // UCI_H

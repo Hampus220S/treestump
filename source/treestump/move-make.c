@@ -6,7 +6,7 @@
  *
  * Written by Hampus Fridholm
  *
- * Last updated: 2024-09-10
+ * Last updated: 2024-09-11
  */
 
 #include "../treestump.h"
@@ -163,7 +163,7 @@ static void castle_clear_for_capture_piece(Position* position, Move move)
 }
 
 /*
- * Capture one of the opponents pieces
+ * Capture one of the enemy's pieces
  *
  * If a rook is being captured, remove its castling rights
  *
@@ -218,8 +218,8 @@ static void move_normal_make(Position* position, Move move)
  * 1. For getting the enpassant square of double jumping pawn
  *  - Get the enpassant square which has been jumped over
  *
- * 2. For getting the square of double jumped opponent pawn
- *  - Get the square which the opponent pawn is standing on
+ * 2. For getting the square of double jumped enemy pawn
+ *  - Get the square which the enemy pawn is standing on
  */
 #define PASSANT_SQUARE_GET(PIECE, SQUARE) (((PIECE) == PIECE_WHITE_PAWN) ? ((SQUARE) + BOARD_FILES) : ((SQUARE) - BOARD_FILES))
 
@@ -280,7 +280,7 @@ static void move_pawn_promote_quiet_make(Position* position, Move move)
 }
 
 /*
- * Make a pawn move - promote and capture opponents piece
+ * Make a pawn move - promote and capture enemy's piece
  *
  * If a rook is being captured, remove its castling rights
  */
