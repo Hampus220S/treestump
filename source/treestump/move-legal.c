@@ -9,176 +9,199 @@
 #include "../treestump.h"
 
 /*
- *
+ * Check if white pawn double jump move is pseudo legal
  */
 static bool move_pawn_double_white_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_SOURCE_GET(move);
-  Square targetSquare = MOVE_TARGET_GET(move);
+  Square source_square = MOVE_SOURCE_GET(move);
+  Square target_square = MOVE_TARGET_GET(move);
 
-  if(!(sourceSquare >= A2 && sourceSquare <= H2)) return false;
+  // Check so pawn is standing on 2nd rank
+  if(!(source_square >= A2 && source_square <= H2)) return false;
 
-  if((sourceSquare - targetSquare) != (BOARD_FILES * 2)) return false;
+  // Check so pawn is moving 2 ranks forward
+  if((source_square - target_square) != (BOARD_FILES * 2)) return false;
 
-  U64 moveCovers = (1ULL << targetSquare) | (1ULL << (targetSquare + BOARD_FILES));
+  // Check so no piece is in the way
+  U64 move_cover = (1ULL << target_square) | (1ULL << (target_square + BOARD_FILES));
 
-  if(moveCovers & position.covers[SIDE_BOTH]) return false;
+  if(move_cover & position.covers[SIDE_BOTH]) return false;
 
   return true;
 }
 
 /*
- *
+ * Check if black pawn double jump move is pseudo legal
  */
 static bool move_pawn_double_black_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_SOURCE_GET(move);
-  Square targetSquare = MOVE_TARGET_GET(move);
+  Square source_square = MOVE_SOURCE_GET(move);
+  Square target_square = MOVE_TARGET_GET(move);
 
-  if(!(sourceSquare >= A7 && sourceSquare <= H7)) return false;
+  // Check so pawn is standing on 7th rank
+  if(!(source_square >= A7 && source_square <= H7)) return false;
 
-  if((targetSquare - sourceSquare) != (BOARD_FILES * 2)) return false;
+  // Check so pawn is moving 2 ranks forward
+  if((target_square - source_square) != (BOARD_FILES * 2)) return false;
 
-  U64 moveCovers = (1ULL << targetSquare) | (1ULL << (targetSquare - BOARD_FILES));
+  // Check so no piece is in the way
+  U64 move_cover = (1ULL << target_square) | (1ULL << (target_square - BOARD_FILES));
 
-  if(moveCovers & position.covers[SIDE_BOTH]) return false;
+  if(move_cover & position.covers[SIDE_BOTH]) return false;
 
   return true;
 }
 
 /*
- *
+ * Check if pawn double jump move is pseudo legal
  */
 static bool move_pawn_double_is_pseudo_legal(Position position, Move move)
 {
-  Piece sourcePiece = MOVE_PIECE_GET(move);
+  switch(MOVE_PIECE_GET(move))
+  {
+    case PIECE_WHITE_PAWN:
+      return move_pawn_double_white_is_pseudo_legal(position, move);
 
-  if(sourcePiece == PIECE_WHITE_PAWN)
-  {
-    return move_pawn_double_white_is_pseudo_legal(position, move);
+    case PIECE_BLACK_PAWN:
+      return move_pawn_double_black_is_pseudo_legal(position, move);
+
+    default:
+      return false;
   }
-  else if(sourcePiece == PIECE_BLACK_PAWN)
-  {
-    return move_pawn_double_black_is_pseudo_legal(position, move);
-  }
-  else return false;
 }
 
 /*
- *
+ * Check if white pawn enpassant move is pseudo legal
  */
 static bool move_pawn_passant_white_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_SOURCE_GET(move);
-  Square targetSquare = MOVE_TARGET_GET(move);
+  Square source_square = MOVE_SOURCE_GET(move);
+  Square target_square = MOVE_TARGET_GET(move);
 
-  if(!((sourceSquare >= A5) && (sourceSquare <= H5))) return false;
+  // Check so pawn is standing on 5th rank
+  if(!((source_square >= A5) && (source_square <= H5))) return false;
 
-  if(!((targetSquare >= A6) && (targetSquare <= H6))) return false;
+  // Check so passant square is on 6th rank
+  if(!((target_square >= A6) && (target_square <= H6))) return false;
 
+  // Check so pawn is move one step forward to the side
+  int moved_squares = (target_square - source_square);
 
-  int squareDiff = (targetSquare - sourceSquare);
+  if((moved_squares != -9) && (moved_squares != -7)) return false;
 
-  if((squareDiff != -9) && (squareDiff != -7)) return false;
+  // Check so black pawn is standing next to passant square
+  if(!BOARD_SQUARE_GET(position.boards[PIECE_BLACK_PAWN], (target_square + BOARD_FILES))) return false;
 
-  if(!BOARD_SQUARE_GET(position.boards[PIECE_BLACK_PAWN], (targetSquare + BOARD_FILES))) return false;
-
-  if(position.covers[SIDE_BOTH] & (1ULL << targetSquare)) return false;
+  // Check so target square is empty
+  if(position.covers[SIDE_BOTH] & (1ULL << target_square)) return false;
 
   return true;
 }
 
 /*
- *
+ * Check if black pawn enpassant move is pseudo legal
  */
 static bool move_pawn_passant_black_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_SOURCE_GET(move);
-  Square targetSquare = MOVE_TARGET_GET(move);
+  Square source_square = MOVE_SOURCE_GET(move);
+  Square target_square = MOVE_TARGET_GET(move);
 
-  int squareDiff = (targetSquare - sourceSquare);
+  // Check so pawn is standing on 4th rank
+  if(!((source_square >= A4) && (source_square <= H4))) return false;
 
-  if(!((sourceSquare >= A4) && (sourceSquare <= H4))) return false;
+  // Check so passant square is on 3th rank
+  if(!((target_square >= A3) && (target_square <= H3))) return false;
 
-  if(!((targetSquare >= A3) && (targetSquare <= H3))) return false;
+  // Check so pawn is move one step forward to the side
+  int moved_squares = (target_square - source_square);
 
-  if((squareDiff != +9) && (squareDiff != +7)) return false;
+  if((moved_squares != +9) && (moved_squares != +7)) return false;
 
-  if(!BOARD_SQUARE_GET(position.boards[PIECE_WHITE_PAWN], (targetSquare - BOARD_FILES))) return false;
+  // Check so white pawn is standing next to passant square
+  if(!BOARD_SQUARE_GET(position.boards[PIECE_WHITE_PAWN], (target_square - BOARD_FILES))) return false;
 
-  if(position.covers[SIDE_BOTH] & (1ULL << targetSquare)) return false;
+  // Check so target square is empty
+  if(position.covers[SIDE_BOTH] & (1ULL << target_square)) return false;
 
   return true;
 }
 
 /*
- *
+ * Check if pawn enpassant move is pseudo legal
  */
 static bool move_pawn_passant_is_pseudo_legal(Position position, Move move)
 {
-  Piece sourcePiece = MOVE_PIECE_GET(move);
+  switch(MOVE_PIECE_GET(move))
+  {
+    case PIECE_WHITE_PAWN:
+      return move_pawn_passant_white_is_pseudo_legal(position, move);
 
-  if(sourcePiece == PIECE_WHITE_PAWN)
-  {
-    return move_pawn_passant_white_is_pseudo_legal(position, move);
+    case PIECE_BLACK_PAWN:
+      return move_pawn_passant_black_is_pseudo_legal(position, move);
+
+    default:
+      return false;
   }
-  else if(sourcePiece == PIECE_BLACK_PAWN)
-  {
-    return move_pawn_passant_black_is_pseudo_legal(position, move);
-  }
-  else return false;
 }
 
 /*
+ * Check if pawn capture move is pseudo legal
  *
+ * Fix: Rewrite this function
  */
 static bool move_pawn_capture_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_SOURCE_GET(move);
-  Square targetSquare = MOVE_TARGET_GET(move);
+  Square source_square = MOVE_SOURCE_GET(move);
+  Square target_square = MOVE_TARGET_GET(move);
 
+  // Check so a piece is standing on target square
+  if(!((1ULL << target_square) & position.covers[SIDE_BOTH])) return false;
 
-  if(!((1ULL << targetSquare) & position.covers[SIDE_BOTH])) return false;
-
-  bool targetWhite = ((1ULL << targetSquare) & position.covers[SIDE_WHITE]);
-  bool sourceWhite = ((1ULL << sourceSquare) & position.covers[SIDE_WHITE]);
+  // Check so source piece and target piece are not on same side
+  bool targetWhite = ((1ULL << target_square) & position.covers[SIDE_WHITE]);
+  bool sourceWhite = ((1ULL << source_square) & position.covers[SIDE_WHITE]);
 
   if(!(sourceWhite ^ targetWhite)) return false;
 
-
+  // Check so pawn can attack at target square
   Side side = (sourceWhite ? SIDE_WHITE : SIDE_BLACK);
 
-  return (attacks_pawn_get(sourceSquare, side) & (1ULL << targetSquare));
-}
-
-/*
- *
- */
-static bool move_pawn_normal_is_pseudo_legal(Position position, Move move)
-{
-  Square sourceSquare = MOVE_SOURCE_GET(move);
-  Square targetSquare = MOVE_TARGET_GET(move);
-
-  Piece sourcePiece = MOVE_PIECE_GET(move);
-
-  if((1ULL << targetSquare) & position.covers[SIDE_BOTH]) return false;
-
-
-  if(sourcePiece == PIECE_WHITE_PAWN)
-  {
-    if((sourceSquare - targetSquare) != BOARD_FILES) return false;
-  }
-  else if(sourcePiece == PIECE_BLACK_PAWN)
-  {
-    if((targetSquare - sourceSquare) != BOARD_FILES) return false;
-  }
-  else return false;
+  if(!(attacks_pawn_get(source_square, side) & (1ULL << target_square))) return false;
 
   return true;
 }
 
 /*
- *
+ * Check if a normal pawn move is pseudo legal
+ */
+static bool move_pawn_normal_is_pseudo_legal(Position position, Move move)
+{
+  Square source_square = MOVE_SOURCE_GET(move);
+  Square target_square = MOVE_TARGET_GET(move);
+
+  // Check so no piece is standing on target square
+  if((1ULL << target_square) & position.covers[SIDE_BOTH]) return false;
+
+  // Check so pawn is moving only 1 rank forward
+  switch(MOVE_PIECE_GET(move))
+  {
+    case PIECE_WHITE_PAWN:
+      if((source_square - target_square) != BOARD_FILES) return false;
+      break;
+
+    case PIECE_BLACK_PAWN:
+      if((target_square - source_square) != BOARD_FILES) return false;
+      break;
+
+    default:
+      return false;
+  }
+
+  return true;
+}
+
+/*
+ * Check if pawn move is pseudo legal
  */
 static bool move_pawn_is_pseudo_legal(Position position, Move move)
 {
@@ -201,187 +224,206 @@ static bool move_pawn_is_pseudo_legal(Position position, Move move)
 }
 
 /*
- *
+ * Check if white king-side castling move is pseudo legal
  */
 static bool move_castle_white_king_is_pseudo_legal(Position position)
 {
+  // Check so a white rook is standing on H1
   if(!BOARD_SQUARE_GET(position.boards[PIECE_WHITE_ROOK], H1)) return false;
 
+  // Check so no piece is in the way
   if(position.covers[SIDE_BOTH] & ((1ULL << G1) | (1ULL << F1))) return false;
 
+  // Check so the king has right to castle king-side
   if(!(position.castle & CASTLE_WHITE_KING)) return false;
 
-  if(square_is_attacked(position, F1, SIDE_BLACK)) return false;
-
-  if(square_is_attacked(position, G1, SIDE_BLACK)) return false;
-
-  if(square_is_attacked(position, E1, SIDE_BLACK)) return false;
+  // Check so no square where king moves is attacked by black
+  if(square_is_attacked(position, F1, SIDE_BLACK) ||
+     square_is_attacked(position, G1, SIDE_BLACK) ||
+     square_is_attacked(position, E1, SIDE_BLACK)) return false;
 
   return true;
 }
 
 /*
- *
+ * Check if white queen-side castling move is pseudo legal
  */
 static bool move_castle_white_queen_is_pseudo_legal(Position position)
 {
+  // Check so a white rook is standing on A1
   if(!BOARD_SQUARE_GET(position.boards[PIECE_WHITE_ROOK], A1)) return false;
 
+  // Check so no piece is in the way
   if(position.covers[SIDE_BOTH] & ((1ULL << B1) | (1ULL << C1) | (1ULL << D1))) return false;
 
+  // Check so the king has right to castle queen-side
   if(!(position.castle & CASTLE_WHITE_QUEEN)) return false;
 
-  if(square_is_attacked(position, C1, SIDE_BLACK)) return false;
-
-  if(square_is_attacked(position, D1, SIDE_BLACK)) return false;
-
-  if(square_is_attacked(position, E1, SIDE_BLACK)) return false;
+  // Check so no square where king moves is attacked by black
+  if(square_is_attacked(position, C1, SIDE_BLACK) ||
+     square_is_attacked(position, D1, SIDE_BLACK) ||
+     square_is_attacked(position, E1, SIDE_BLACK)) return false;
 
   return true;
 }
 
 /*
- *
+ * Check if white castling move is pseudo legal
  */
 static bool move_castle_white_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_SOURCE_GET(move);
-  Square targetSquare = MOVE_TARGET_GET(move);
+  if(MOVE_SOURCE_GET(move) != E1) return false;
 
-  if(sourceSquare != E1) return false;
+  switch(MOVE_TARGET_GET(move))
+  {
+    case G1:
+      return move_castle_white_king_is_pseudo_legal(position);
 
-  if(targetSquare == G1)
-  {
-    return move_castle_white_king_is_pseudo_legal(position);
+    case C1:
+      return move_castle_white_queen_is_pseudo_legal(position);
+
+    default:
+      return false;
   }
-  else if(targetSquare == C1)
-  {
-    return move_castle_white_queen_is_pseudo_legal(position);
-  }
-  else return false;
 }
 
 /*
- *
+ * Check if black king-side castling move is pseudo legal
  */
 static bool move_castle_black_king_is_pseudo_legal(Position position)
 {
+  // Check so a white rook is standing on H8
   if(!BOARD_SQUARE_GET(position.boards[PIECE_BLACK_ROOK], H8)) return false;
 
+  // Check so no piece is in the way
   if(position.covers[SIDE_BOTH] & ((1ULL << G8) | (1ULL << F8))) return false;
 
+  // Check so the king has right to castle king-side
   if(!(position.castle & CASTLE_BLACK_KING)) return false;
 
-  if(square_is_attacked(position, G8, SIDE_WHITE)) return false;
-
-  if(square_is_attacked(position, F8, SIDE_WHITE)) return false;
-
-  if(square_is_attacked(position, E8, SIDE_WHITE)) return false;
+  // Check so no square where king moves is attacked by white
+  if(square_is_attacked(position, G8, SIDE_WHITE) ||
+     square_is_attacked(position, F8, SIDE_WHITE) ||
+     square_is_attacked(position, E8, SIDE_WHITE)) return false;
 
   return true;
 }
 
 /*
- *
+ * Check if black queen-side castling move is pseudo legal
  */
 static bool move_castle_black_queen_is_pseudo_legal(Position position)
 {
+  // Check so a white rook is standing on A8
   if(!BOARD_SQUARE_GET(position.boards[PIECE_BLACK_ROOK], A8)) return false;
 
+  // Check so no piece is in the way
   if(position.covers[SIDE_BOTH] & ((1ULL << B8) | (1ULL << C8) | (1ULL << D8))) return false;
 
+  // Check so the king has right to castle queen-side
   if(!(position.castle & CASTLE_BLACK_QUEEN)) return false;
 
-  if(square_is_attacked(position, C8, SIDE_WHITE)) return false;
-
-  if(square_is_attacked(position, D8, SIDE_WHITE)) return false;
-
-  if(square_is_attacked(position, E8, SIDE_WHITE)) return false;
+  // Check so no square where king moves is attacked by white
+  if(square_is_attacked(position, C8, SIDE_WHITE) ||
+     square_is_attacked(position, D8, SIDE_WHITE) ||
+     square_is_attacked(position, E8, SIDE_WHITE)) return false;
 
   return true;
 }
 
 /*
- *
+ * Check if black castling move is pseudo legal
  */
 static bool move_castle_black_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_SOURCE_GET(move);
-  Square targetSquare = MOVE_TARGET_GET(move);
+  if(MOVE_SOURCE_GET(move) != E8) return false;
 
-  if(sourceSquare != E8) return false;
+  switch(MOVE_TARGET_GET(move))
+  {
+    case G8:
+      return move_castle_black_king_is_pseudo_legal(position);
 
-  if(targetSquare == G8)
-  {
-    return move_castle_black_king_is_pseudo_legal(position);
+    case C8:
+      return move_castle_black_queen_is_pseudo_legal(position);
+
+    default:
+      return false;
   }
-  else if(targetSquare == C8)
-  {
-    return move_castle_black_queen_is_pseudo_legal(position);
-  }
-  else return false;
 }
 
 /*
- *
+ * Check if castling move is pseudo legal
  */
 static bool move_castle_is_pseudo_legal(Position position, Move move)
 {
-  Piece sourcePiece = MOVE_PIECE_GET(move);
+  switch(MOVE_PIECE_GET(move))
+  {
+    case PIECE_WHITE_KING:
+      return move_castle_white_is_pseudo_legal(position, move);
 
-  if(sourcePiece == PIECE_WHITE_KING)
-  {
-    return move_castle_white_is_pseudo_legal(position, move);
+    case PIECE_BLACK_KING:
+      return move_castle_black_is_pseudo_legal(position, move);
+
+    default:
+      return false;
   }
-  else if(sourcePiece == PIECE_BLACK_KING)
-  {
-    return move_castle_black_is_pseudo_legal(position, move);
-  }
-  else return false;
 }
 
 /*
- *
+ * Check if a normal move is pseudo legal
  */
 static bool move_normal_is_pseudo_legal(Position position, Move move)
 {
-  Square sourceSquare = MOVE_SOURCE_GET(move);
-  Square targetSquare = MOVE_TARGET_GET(move);
+  Square source_square = MOVE_SOURCE_GET(move);
+  Square target_square = MOVE_TARGET_GET(move);
 
-  Piece sourcePiece = MOVE_PIECE_GET(move);
+  // Prio 1. If there are any pieces between source and target square
+  if(BOARD_LINES[source_square][target_square] & position.covers[SIDE_BOTH])
+  {
+    return false;
+  }
+
+  Piece source_piece = MOVE_PIECE_GET(move);
 
   // If the moving piece does not exists on the source square
-  if(!BOARD_SQUARE_GET(position.boards[sourcePiece], sourceSquare)) return false;
+  if(!BOARD_SQUARE_GET(position.boards[source_piece], source_square))
+  {
+    return false;
+  }
 
-  Piece targetPiece = square_piece_get(position.boards, targetSquare);
+  Piece target_piece = square_piece_get(position.boards, target_square);
 
   // If the capture flag and the target piece doesn't match each other
-  if(((move & MOVE_MASK_CAPTURE) ? 1 : 0) ^ (targetPiece != PIECE_NONE)) return false;
+  if(((move & MOVE_MASK_CAPTURE) ? 1 : 0) ^ (target_piece != PIECE_NONE))
+  {
+    return false;
+  }
 
-  bool sourceWhite = (sourcePiece >= PIECE_WHITE_PAWN && sourcePiece <= PIECE_WHITE_KING);
-  bool targetWhite = (targetPiece >= PIECE_WHITE_PAWN && targetPiece <= PIECE_WHITE_KING);
+  bool sourceWhite = (source_piece >= PIECE_WHITE_PAWN && source_piece <= PIECE_WHITE_KING);
+  bool targetWhite = (target_piece >= PIECE_WHITE_PAWN && target_piece <= PIECE_WHITE_KING);
 
-  // If source and target are not of different sides (same sides)
-  if((move & MOVE_MASK_CAPTURE) && !(sourceWhite ^ targetWhite)) return false;
+  // If a target piece exists (capture) and 
+  // source and target are not of different sides (same sides)
+  if((move & MOVE_MASK_CAPTURE) && !(sourceWhite ^ targetWhite))
+  {
+    return false;
+  }
 
-  // If there are any pieces between source and target square
-  if(BOARD_LINES[sourceSquare][targetSquare] & position.covers[SIDE_BOTH]) return false;
-
-  // The piece is able to move from sourceSquare to targetSquare
-  return (attacks_get(sourceSquare, position) & (1ULL << targetSquare));
+  // The piece is able to move from source_square to target_square
+  return (attacks_get(source_square, position) & (1ULL << target_square));
 }
 
 /*
- *
+ * Check if move is pseudo legal in position
  */
 static bool move_is_pseudo_legal(Position position, Move move)
 {
-  Piece sourcePiece = MOVE_PIECE_GET(move);
+  Piece piece = MOVE_PIECE_GET(move);
 
-  if(PIECE_SIDE_GET(sourcePiece) != position.side) return false;
+  if(PIECE_SIDE_GET(piece) != position.side) return false;
 
 
-  if((sourcePiece == PIECE_WHITE_PAWN) || (sourcePiece == PIECE_BLACK_PAWN))
+  if((piece == PIECE_WHITE_PAWN) || (piece == PIECE_BLACK_PAWN))
   {
     return move_pawn_is_pseudo_legal(position, move);
   }
@@ -396,23 +438,37 @@ static bool move_is_pseudo_legal(Position position, Move move)
 }
 
 /*
+ * Get the square of the king of the supplied side
+ */
+static Square king_square_get(Position position, Side side)
+{
+  Piece king_piece = (side == SIDE_WHITE) ? PIECE_WHITE_KING : PIECE_BLACK_KING;
+
+  return board_first_square_get(position.boards[king_piece]);
+}
+
+/*
+ * Check if a move is legal in position
  *
+ * If the move is pseudo legal,
+ * try making the move and see if the king is attacked
+ * - if not, the move is legal
+ *
+ * RETURN (bool result)
+ * - true  | Move is legal
+ * - false | Move is illegal
  */
 bool move_is_legal(Position position, Move move)
 {
   if(!move_is_pseudo_legal(position, move)) return false;
 
-  Position movedPosition = position;
+  Position moved_position = position;
+  move_make(&moved_position, move);
 
-  move_make(&movedPosition, move);
+  Square king_square = king_square_get(moved_position, position.side);
 
-  // New: SIDE_KING_PIECE_GET
-  Piece kingPiece = (movedPosition.side == SIDE_WHITE) ? PIECE_BLACK_KING : PIECE_WHITE_KING;
+  // If the king does not exist, the move can no way be legal
+  if(king_square == SQUARE_NONE) return false;
 
-  Square kingSquare = board_first_square_get(movedPosition.boards[kingPiece]);
-
-  // The king should always exists, but if it don't return false
-  if(kingSquare == SQUARE_NONE) return false;
-
-  return !square_is_attacked(movedPosition, kingSquare, movedPosition.side);
+  return !square_is_attacked(moved_position, king_square, moved_position.side);
 }
