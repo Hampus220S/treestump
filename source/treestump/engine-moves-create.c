@@ -1,7 +1,9 @@
 /*
+ * Create an array of legal moves in position
+ *
  * Written by Hampus Fridholm
  *
- * Last updated: 2024-09-09
+ * Last updated: 2024-09-11
  */
 
 #include "../treestump.h"
@@ -9,229 +11,309 @@
 #include "engine-intern.h"
 
 /*
+ * Add move to move array, but only if it is legal
  *
+ * RETURN (bool result)
+ * - true  | Move was added
+ * - false | Move was not legal, and not added
  */
-static void moves_white_pawn_promote_create(MoveArray* moveArray, Position position, Square sourceSquare)
+static bool move_add_if_legal(MoveArray* move_array, Position position, Move move)
 {
-  for(Square targetSquare = (sourceSquare - 9); targetSquare <= (sourceSquare - 7); targetSquare++)
+  if(!move_is_legal(position, move)) return false;
+
+  move_array->moves[move_array->amount++] = move;
+
+  return true;
+}
+
+/*
+ * Create the different promote moves for a white pawn
+ */
+static void moves_white_pawn_promote_pieces_create(MoveArray* move_array, Move move)
+{
+  for(Piece piece = PIECE_WHITE_KNIGHT; piece <= PIECE_WHITE_QUEEN; piece++)
   {
-    Move move = move_promote_create(position.boards, sourceSquare, targetSquare, PIECE_WHITE_PAWN, PIECE_WHITE_QUEEN);
+    move = (move & ~MOVE_MASK_PROMOTE) | MOVE_PROMOTE_SET(piece);
 
-    if(!move_is_legal(position, move)) continue;
+    move_array->moves[move_array->amount++] = move;
+  }
+}
 
-    for(Piece promotePiece = PIECE_WHITE_KNIGHT; promotePiece <= PIECE_WHITE_QUEEN; promotePiece++)
+/*
+ * Create legal moves for a white pawn, which promotes
+ *
+ * If a pawn is standing on A7, pawn_square - 9 will result in unsigned underflow
+ */
+static void moves_white_pawn_promote_create(MoveArray* move_array, Position position, Square pawn_square)
+{
+  Square left_square  = ((int) pawn_square - 9) > 0 ? (pawn_square - 9) : 0;
+  Square right_square = pawn_square - 7;
+
+  for(Square promote_square = left_square; promote_square <= right_square; promote_square++)
+  {
+    Move move = move_promote_create(position.boards, pawn_square, promote_square, PIECE_WHITE_PAWN, PIECE_WHITE_QUEEN);
+
+    if(move_is_legal(position, move))
     {
-      move = (move & ~MOVE_MASK_PROMOTE) | MOVE_PROMOTE_SET(promotePiece);
-
-      moveArray->moves[moveArray->amount++] = move;
+      moves_white_pawn_promote_pieces_create(move_array, move);
     }
   }
 }
 
 /*
- *
+ * Create legal moves for a white pawn, that do not promote
  */
-static void moves_white_pawn_create(MoveArray* moveArray, Position position, Square sourceSquare)
+static void moves_white_pawn_other_create(MoveArray* move_array, Position position, Square pawn_square)
 {
-  if(sourceSquare >= A7 && sourceSquare <= H7)
+  for(Square target_square = (pawn_square - 9); target_square <= (pawn_square - 7); target_square++)
   {
-    moves_white_pawn_promote_create(moveArray, position, sourceSquare);
+    Move move = move_normal_create(position.boards, pawn_square, target_square, PIECE_WHITE_PAWN);
+
+    if(target_square == position.passant)
+    {
+      move |= MOVE_MASK_PASSANT;
+    }
+
+    move_add_if_legal(move_array, position, move);
   }
-  else // Rewrite this code
+
+  if(pawn_square >= A2 && pawn_square <= H2)
   {
-    for(Square targetSquare = (sourceSquare - 9); targetSquare <= (sourceSquare - 7); targetSquare++)
-    {
-      Move move = move_normal_create(position.boards, sourceSquare, targetSquare, PIECE_WHITE_PAWN);
+    Move move = move_double_create(pawn_square, pawn_square - (BOARD_FILES * 2), PIECE_WHITE_PAWN);
 
-      if(targetSquare == position.passant) move |= MOVE_MASK_PASSANT;
-
-      if(move_is_legal(position, move)) moveArray->moves[moveArray->amount++] = move;
-    }
-
-    if(sourceSquare >= A2 && sourceSquare <= H2)
-    {
-      Move move = move_double_create(sourceSquare, sourceSquare - (BOARD_FILES * 2), PIECE_WHITE_PAWN);
-
-      if(move_is_legal(position, move)) moveArray->moves[moveArray->amount++] = move;
-    }
+    move_add_if_legal(move_array, position, move);
   }
 }
 
 /*
- *
+ * Create legal moves for a white pawn
  */
-static void moves_black_pawn_promote_create(MoveArray* moveArray, Position position, Square sourceSquare)
+static void moves_white_pawn_create(MoveArray* move_array, Position position, Square pawn_square)
 {
-  for(Square targetSquare = (sourceSquare + 7); targetSquare <= (sourceSquare + 9); targetSquare++)
+  if(pawn_square >= A7 && pawn_square <= H7)
   {
-    Move move = move_promote_create(position.boards, sourceSquare, targetSquare, PIECE_BLACK_PAWN, PIECE_BLACK_QUEEN);
-
-    if(!move_is_legal(position, move)) continue;
-
-    for(Piece promotePiece = PIECE_BLACK_KNIGHT; promotePiece <= PIECE_BLACK_QUEEN; promotePiece++)
-    {
-      move = (move & ~MOVE_MASK_PROMOTE) | MOVE_PROMOTE_SET(promotePiece);
-
-      moveArray->moves[moveArray->amount++] = move;
-    }
+    moves_white_pawn_promote_create(move_array, position, pawn_square);
+  }
+  else
+  {
+    moves_white_pawn_other_create(move_array, position, pawn_square);
   }
 }
 
 /*
- *
+ * Create the different promote moves for a black pawn
  */
-static void moves_black_pawn_create(MoveArray* moveArray, Position position, Square sourceSquare)
+static void moves_black_pawn_promote_pieces_create(MoveArray* move_array, Move move)
 {
-  if(sourceSquare >= A2 && sourceSquare <= H2)
+  for(Piece piece = PIECE_BLACK_KNIGHT; piece <= PIECE_BLACK_QUEEN; piece++)
   {
-    moves_black_pawn_promote_create(moveArray, position, sourceSquare);
+    // Make this into a macro, or edit MOVE_PROMOTE_SET to implement this
+    move = (move & ~MOVE_MASK_PROMOTE) | MOVE_PROMOTE_SET(piece);
+
+    move_array->moves[move_array->amount++] = move;
   }
-  else // Rewrite this code
+}
+
+/*
+ * Create legal moves for a black pawn, which promotes
+ *
+ * If a pawn is standing on H2, pawn_square + 9 will result in unsigned underflow
+ */
+static void moves_black_pawn_promote_create(MoveArray* move_array, Position position, Square pawn_square)
+{
+  Square right_square = ((int) pawn_square + 9) > 0 ? (pawn_square + 9) : 0;
+  Square left_square  = pawn_square + 7;
+
+  for(Square promote_square = left_square; promote_square <= right_square; promote_square++)
   {
-    for(Square targetSquare = (sourceSquare + 7); targetSquare <= (sourceSquare + 9); targetSquare++)
+    Move move = move_promote_create(position.boards, pawn_square, promote_square, PIECE_BLACK_PAWN, PIECE_BLACK_QUEEN);
+
+    if(move_is_legal(position, move))
     {
-      Move move = move_normal_create(position.boards, sourceSquare, targetSquare, PIECE_BLACK_PAWN);
-
-      if(targetSquare == position.passant) move |= MOVE_MASK_PASSANT;
-
-      if(move_is_legal(position, move)) moveArray->moves[moveArray->amount++] = move;
-    }
-
-    if(sourceSquare >= A7 && sourceSquare <= H7)
-    {
-      Move move = move_double_create(sourceSquare, sourceSquare + (BOARD_FILES * 2), PIECE_BLACK_PAWN);
-
-      if(move_is_legal(position, move)) moveArray->moves[moveArray->amount++] = move;
+      moves_black_pawn_promote_pieces_create(move_array, move);
     }
   }
 }
 
 /*
- *
+ * Create legal moves for a black pawn, that do not promote
  */
-static void moves_white_castle_create(MoveArray* moveArray, Position position)
+static void moves_black_pawn_other_create(MoveArray* move_array, Position position, Square pawn_square)
 {
-  Move move = move_castle_create(E1, C1, PIECE_WHITE_KING);
-
-  if(move_is_legal(position, move)) moveArray->moves[moveArray->amount++] = move;
-
-  move = move_castle_create(E1, G1, PIECE_WHITE_KING);
-
-  if(move_is_legal(position, move)) moveArray->moves[moveArray->amount++] = move;
-}
-
-/*
- *
- */
-static void moves_black_castle_create(MoveArray* moveArray, Position position)
-{
-  Move move = move_castle_create(E8, C8, PIECE_BLACK_KING);
-
-  if(move_is_legal(position, move)) moveArray->moves[moveArray->amount++] = move;
-
-  move = move_castle_create(E8, G8, PIECE_BLACK_KING);
-
-  if(move_is_legal(position, move)) moveArray->moves[moveArray->amount++] = move;
-}
-
-/*
- *
- */
-static void moves_white_normal_create(MoveArray* moveArray, Position position, Square sourceSquare, Piece piece)
-{
-  if(piece == PIECE_WHITE_KING && sourceSquare == E1)
+  for(Square target_square = (pawn_square + 7); target_square <= (pawn_square + 9); target_square++)
   {
-    moves_white_castle_create(moveArray, position);
+    Move move = move_normal_create(position.boards, pawn_square, target_square, PIECE_BLACK_PAWN);
+
+    if(target_square == position.passant) 
+    {
+      move |= MOVE_MASK_PASSANT;
+    }
+
+    move_add_if_legal(move_array, position, move);
+  }
+
+  if(pawn_square >= A7 && pawn_square <= H7)
+  {
+    Move move = move_double_create(pawn_square, pawn_square + (BOARD_FILES * 2), PIECE_BLACK_PAWN);
+
+    move_add_if_legal(move_array, position, move);
+  }
+}
+
+/*
+ * Create legal moves for a black pawn
+ */
+static void moves_black_pawn_create(MoveArray* move_array, Position position, Square pawn_square)
+{
+  if(pawn_square >= A2 && pawn_square <= H2)
+  {
+    moves_black_pawn_promote_create(move_array, position, pawn_square);
+  }
+  else
+  {
+    moves_black_pawn_other_create(move_array, position, pawn_square);
+  }
+}
+
+/*
+ * Create legal castling move for the white king
+ */
+static void moves_white_castle_create(MoveArray* move_array, Position position)
+{
+  Move move;
+
+  if(position.castle & CASTLE_WHITE_QUEEN)
+  {
+    move = move_castle_create(E1, C1, PIECE_WHITE_KING);
+
+    move_add_if_legal(move_array, position, move);
+  }
+
+  if(position.castle & CASTLE_WHITE_KING)
+  {
+    move = move_castle_create(E1, G1, PIECE_WHITE_KING);
+
+    move_add_if_legal(move_array, position, move);
+  }
+}
+
+/*
+ * Create legal castling move for the black king
+ */
+static void moves_black_castle_create(MoveArray* move_array, Position position)
+{
+  Move move;
+
+  if(position.castle & CASTLE_BLACK_QUEEN)
+  {
+    move = move_castle_create(E8, C8, PIECE_BLACK_KING);
+
+    move_add_if_legal(move_array, position, move);
   }
   
-  U64 attackBoard = attacks_get(sourceSquare, position);
-
-  while(attackBoard)
+  if(position.castle & CASTLE_BLACK_KING)
   {
-    Square targetSquare = board_first_square_get(attackBoard);
+    move = move_castle_create(E8, G8, PIECE_BLACK_KING);
 
-    Move move = move_normal_create(position.boards, sourceSquare, targetSquare, piece);
-    
-    if(move_is_legal(position, move)) moveArray->moves[moveArray->amount++] = move;
-
-    attackBoard = BOARD_SQUARE_POP(attackBoard, targetSquare);
+    move_add_if_legal(move_array, position, move);
   }
 }
 
 /*
- *
+ * Create legal moves for pieces, except pawns
  */
-static void moves_white_create(MoveArray* moveArray, Position position)
+static void moves_normal_create(MoveArray* move_array, Position position, Square source_square, Piece piece)
+{
+  U64 target_board = attacks_get(source_square, position);
+
+  while(target_board)
+  {
+    Square target_square = board_first_square_get(target_board);
+
+    Move move = move_normal_create(position.boards, source_square, target_square, piece);
+    
+    move_add_if_legal(move_array, position, move);
+
+    target_board = BOARD_SQUARE_POP(target_board, target_square);
+  }
+}
+
+/*
+ * Create legal moves for white pieces, except pawns
+ */
+static void moves_white_normal_create(MoveArray* move_array, Position position, Square source_square, Piece piece)
+{
+  moves_normal_create(move_array, position, source_square, piece);
+
+  if(piece == PIECE_WHITE_KING && source_square == E1)
+  {
+    moves_white_castle_create(move_array, position);
+  }
+}
+
+/*
+ * Create legal moves for white
+ */
+static void moves_white_create(MoveArray* move_array, Position position)
 {
   for(Piece piece = PIECE_WHITE_PAWN; piece <= PIECE_WHITE_KING; piece++)
   {
-    U64 pieceBoard = position.boards[piece];
+    U64 piece_board = position.boards[piece];
 
-    while(pieceBoard)
+    while(piece_board)
     {
-      Square sourceSquare = board_first_square_get(pieceBoard);
+      Square source_square = board_first_square_get(piece_board);
 
       if(piece == PIECE_WHITE_PAWN)
       {
-        moves_white_pawn_create(moveArray, position, sourceSquare);
+        moves_white_pawn_create(move_array, position, source_square);
       }
       else
       {
-        moves_white_normal_create(moveArray, position, sourceSquare, piece);
+        moves_white_normal_create(move_array, position, source_square, piece);
       }
 
-      pieceBoard = BOARD_SQUARE_POP(pieceBoard, sourceSquare);
+      piece_board = BOARD_SQUARE_POP(piece_board, source_square);
     }
   }
 }
 
 /*
- *
+ * Create legal moves for black pieces, except pawns
  */
-static void moves_black_normal_create(MoveArray* moveArray, Position position, Square sourceSquare, Piece piece)
+static void moves_black_normal_create(MoveArray* move_array, Position position, Square source_square, Piece piece)
 {
-  if(piece == PIECE_BLACK_KING && sourceSquare == E8)
+  moves_normal_create(move_array, position, source_square, piece);
+
+  if(piece == PIECE_BLACK_KING && source_square == E8)
   {
-    moves_black_castle_create(moveArray, position);
-  }
-
-  U64 attackBoard = attacks_get(sourceSquare, position);
-
-  while(attackBoard)
-  {
-    Square targetSquare = board_first_square_get(attackBoard);
-
-    Move move = move_normal_create(position.boards, sourceSquare, targetSquare, piece);
-    
-    if(move_is_legal(position, move)) moveArray->moves[moveArray->amount++] = move;
-
-    attackBoard = BOARD_SQUARE_POP(attackBoard, targetSquare);
+    moves_black_castle_create(move_array, position);
   }
 }
 
 /*
- *
+ * Create legal moves for black
  */
-static void moves_black_create(MoveArray* moveArray, Position position)
+static void moves_black_create(MoveArray* move_array, Position position)
 {
   for(Piece piece = PIECE_BLACK_PAWN; piece <= PIECE_BLACK_KING; piece++)
   {
-    U64 pieceBoard = position.boards[piece];
+    U64 piece_board = position.boards[piece];
 
-    while(pieceBoard)
+    while(piece_board)
     {
-      Square sourceSquare = board_first_square_get(pieceBoard);
+      Square source_square = board_first_square_get(piece_board);
 
       if(piece == PIECE_BLACK_PAWN)
       {
-        moves_black_pawn_create(moveArray, position, sourceSquare);
+        moves_black_pawn_create(move_array, position, source_square);
       }
       else
       {
-        moves_black_normal_create(moveArray, position, sourceSquare, piece);
+        moves_black_normal_create(move_array, position, source_square, piece);
       }
 
-      pieceBoard = BOARD_SQUARE_POP(pieceBoard, sourceSquare);
+      piece_board = BOARD_SQUARE_POP(piece_board, source_square);
     }
   }
 }
@@ -239,14 +321,14 @@ static void moves_black_create(MoveArray* moveArray, Position position)
 /*
  * Create legal moves for the specified position
  */
-void moves_create(MoveArray* moveArray, Position position)
+void moves_create(MoveArray* move_array, Position position)
 {
   if(position.side == SIDE_WHITE)
   {
-    moves_white_create(moveArray, position);
+    moves_white_create(move_array, position);
   }
   else
   {
-    moves_black_create(moveArray, position);
+    moves_black_create(move_array, position);
   }
 }

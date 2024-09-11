@@ -3,6 +3,7 @@
 * extract square score from files intead of hard coded values
 * Rename functions from convention (_create, _free, object_verb)
 * Add '=' symbol to BOARD_SQUARE_SET/GET/POP (skip the assignment part) (if it works everywhere)
+* Loosen up the strict naming and allow names not following object_verb
 
 * refactore code in move_legal (make it more effective without repeating code validation)
 
@@ -16,3 +17,9 @@ Future
 * Implement one thread for handling stdin and one thread for handling stdout (thinking)
 * Implement SIGUSR1 between threads
 * Implement SIGINT signal handler
+
+Improvement:
+- instead of checking if all 3 types of step forward are legal for pawn,
+  check only forward step,
+  AND toghether pawn attack lookup board and enemy cover to get possible squares to attack for pawn.
+  This will save move_is_legal calls

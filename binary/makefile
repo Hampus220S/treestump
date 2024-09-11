@@ -6,7 +6,7 @@ HELP_TARGET  := help
 DELETE_CMD := rm
 
 COMPILER      := gcc
-COMPILE_FLAGS := -Werror -g -Og -std=gnu99 -oFast
+COMPILE_FLAGS := -Werror -g -O0 -std=gnu99 -oFast
 LINKER_FLAGS  := -lm
 
 SOURCE_DIR := ../source

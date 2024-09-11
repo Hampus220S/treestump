@@ -42,7 +42,7 @@ extern void move_make(Position* position, Move move);
 
 extern Move move_double_create(Square sourceSquare, Square targetSquare, Piece piece);
 
-extern Move move_promote_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece, Piece promotePiece);
+extern Move move_promote_create(U64 boards[12], Square pawn_square, Square promote_square, Piece pawn_piece, Piece promote_piece);
 
 extern Move move_castle_create(Square sourceSquare, Square targetSquare, Piece piece);
 

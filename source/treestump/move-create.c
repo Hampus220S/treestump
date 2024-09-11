@@ -7,6 +7,7 @@
 #include "../treestump.h"
 
 // Rename this
+// Use covers instead of iterating boards
 bool ident_capture_move(U64 boards[12], Square targetSquare)
 {
   Piece targetPiece = square_piece_get(boards, targetSquare);
@@ -15,6 +16,7 @@ bool ident_capture_move(U64 boards[12], Square targetSquare)
 }
 
 // Rename this, and rewrite to be as simple as possible
+// Use covers instead of iterating boards
 bool ident_passant_move(U64 boards[12], Piece sourcePiece, Square sourceSquare, Square targetSquare)
 {
   // Change this function, square_piece_get should not be used
@@ -49,22 +51,29 @@ Move move_double_create(Square sourceSquare, Square targetSquare, Piece piece)
   return move;
 }
 
-Move move_promote_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece, Piece promotePiece)
+/*
+ * Create a promote move, with the right flags
+ *
+ * RETURN (Move move)
+ */
+Move move_promote_create(U64 boards[12], Square pawn_square, Square promote_square, Piece pawn_piece, Piece promote_piece)
 {
   Move move = MOVE_NONE;
 
-  move |= MOVE_SOURCE_SET(sourceSquare);
-  move |= MOVE_TARGET_SET(targetSquare);
+  move |= MOVE_SOURCE_SET(pawn_square);
+  move |= MOVE_TARGET_SET(promote_square);
 
-  move |= MOVE_PIECE_SET(piece);
+  move |= MOVE_PIECE_SET(pawn_piece);
+  move |= MOVE_PROMOTE_SET(promote_piece);
 
-  move |= MOVE_PROMOTE_SET(promotePiece);
-
-  if(ident_capture_move(boards, targetSquare)) move |= MOVE_MASK_CAPTURE;
+  if(ident_capture_move(boards, promote_square)) move |= MOVE_MASK_CAPTURE;
 
   return move;
 }
 
+/*
+ *
+ */
 Move move_castle_create(Square sourceSquare, Square targetSquare, Piece piece)
 {
   Move move = MOVE_NONE;
@@ -79,6 +88,9 @@ Move move_castle_create(Square sourceSquare, Square targetSquare, Piece piece)
   return move;
 }
 
+/*
+ *
+ */
 Move move_normal_create(U64 boards[12], Square sourceSquare, Square targetSquare, Piece piece)
 {
   Move move = MOVE_NONE;
@@ -141,6 +153,8 @@ static Move move_flag_create(U64 boards[12], Piece sourcePiece, Square sourceSqu
  * a queen will be sat as the promote piece
  *
  * RETURN (Move move)
+ *
+ * Fix: Rename or refactor this function
  */
 static Move move_promote_piece_create(Piece sourcePiece, Square targetSquare, Piece promotePiece)
 {
