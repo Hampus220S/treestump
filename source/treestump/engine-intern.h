@@ -12,7 +12,10 @@ extern const int PIECE_SCORES[12];
 extern int position_score_get(Position position);
 
 
+extern bool engine_move_is_legal(Position position, Move move);
+
 extern void moves_create(MoveArray* moveArray, Position position);
+
 
 extern void moves_guess_order(MoveArray* moveArray, Position position);
 

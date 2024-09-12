@@ -51,6 +51,8 @@ extern Move move_normal_create(Position position, Square source_square, Square t
 extern Move move_create(Position position, Square source_square, Square target_square, Piece promote_piece);
 
 
+extern Square king_square_get(Position position, Side side);
+
 extern bool move_is_legal(Position position, Move move);
 
 #endif // MOVE_H

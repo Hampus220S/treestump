@@ -19,7 +19,7 @@
  */
 static bool move_add_if_legal(MoveArray* move_array, Position position, Move move)
 {
-  if(!move_is_legal(position, move)) return false;
+  if(!engine_move_is_legal(position, move)) return false;
 
   move_array->moves[move_array->amount++] = move;
 
@@ -53,7 +53,7 @@ static void moves_white_pawn_promote_create(MoveArray* move_array, Position posi
   {
     Move move = move_promote_create(position, pawn_square, promote_square, PIECE_WHITE_PAWN, PIECE_WHITE_QUEEN);
 
-    if(move_is_legal(position, move))
+    if(engine_move_is_legal(position, move))
     {
       moves_white_pawn_promote_pieces_create(move_array, move);
     }
@@ -159,7 +159,7 @@ static void moves_black_pawn_promote_create(MoveArray* move_array, Position posi
   {
     Move move = move_promote_create(position, pawn_square, promote_square, PIECE_BLACK_PAWN, PIECE_BLACK_QUEEN);
 
-    if(move_is_legal(position, move))
+    if(engine_move_is_legal(position, move))
     {
       moves_black_pawn_promote_pieces_create(move_array, move);
     }
@@ -242,18 +242,16 @@ static void moves_black_pawn_create(MoveArray* move_array, Position position, Sq
  */
 static void moves_white_castle_create(MoveArray* move_array, Position position)
 {
-  Move move;
-
   if(position.castle & CASTLE_WHITE_QUEEN)
   {
-    move = move_castle_create(E1, C1, PIECE_WHITE_KING);
+    Move move = move_castle_create(E1, C1, PIECE_WHITE_KING);
 
     move_add_if_legal(move_array, position, move);
   }
 
   if(position.castle & CASTLE_WHITE_KING)
   {
-    move = move_castle_create(E1, G1, PIECE_WHITE_KING);
+    Move move = move_castle_create(E1, G1, PIECE_WHITE_KING);
 
     move_add_if_legal(move_array, position, move);
   }
@@ -264,18 +262,16 @@ static void moves_white_castle_create(MoveArray* move_array, Position position)
  */
 static void moves_black_castle_create(MoveArray* move_array, Position position)
 {
-  Move move;
-
   if(position.castle & CASTLE_BLACK_QUEEN)
   {
-    move = move_castle_create(E8, C8, PIECE_BLACK_KING);
+    Move move = move_castle_create(E8, C8, PIECE_BLACK_KING);
 
     move_add_if_legal(move_array, position, move);
   }
   
   if(position.castle & CASTLE_BLACK_KING)
   {
-    move = move_castle_create(E8, G8, PIECE_BLACK_KING);
+    Move move = move_castle_create(E8, G8, PIECE_BLACK_KING);
 
     move_add_if_legal(move_array, position, move);
   }
@@ -286,17 +282,21 @@ static void moves_black_castle_create(MoveArray* move_array, Position position)
  */
 static void moves_normal_create(MoveArray* move_array, Position position, Square source_square, Piece piece)
 {
-  U64 target_board = attacks_get(source_square, position);
+  U64 attacks = attacks_get(source_square, position);
 
-  while(target_board)
+  // Remove attacks on own pieces, by
+  // only keeping the squares where no own piece are
+  attacks &= ~(position.covers[PIECE_SIDE_GET(piece)]);
+
+  while(attacks)
   {
-    Square target_square = board_first_square_get(target_board);
+    Square target_square = board_first_square_get(attacks);
 
     Move move = move_normal_create(position, source_square, target_square, piece);
     
     move_add_if_legal(move_array, position, move);
 
-    target_board = BOARD_SQUARE_POP(target_board, target_square);
+    attacks = BOARD_SQUARE_POP(attacks, target_square);
   }
 }
 

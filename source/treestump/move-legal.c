@@ -203,7 +203,7 @@ static bool move_pawn_normal_is_pseudo_legal(Position position, Move move)
 /*
  * Check if pawn move is pseudo legal
  */
-static bool move_pawn_is_pseudo_legal(Position position, Move move)
+bool move_pawn_is_pseudo_legal(Position position, Move move)
 {
   if(move & MOVE_MASK_DOUBLE)
   {
@@ -354,7 +354,7 @@ static bool move_castle_black_is_pseudo_legal(Position position, Move move)
 /*
  * Check if castling move is pseudo legal
  */
-static bool move_castle_is_pseudo_legal(Position position, Move move)
+bool move_castle_is_pseudo_legal(Position position, Move move)
 {
   switch(MOVE_PIECE_GET(move))
   {
@@ -377,40 +377,44 @@ static bool move_normal_is_pseudo_legal(Position position, Move move)
   Square source_square = MOVE_SOURCE_GET(move);
   Square target_square = MOVE_TARGET_GET(move);
 
-  // Prio 1. If there are any pieces between source and target square
+  Piece piece = MOVE_PIECE_GET(move);
+
+  // Check so the moving piece is on the source square
+  if(!BOARD_SQUARE_GET(position.boards[piece], source_square))
+  {
+    return false;
+  }
+
+  bool target_is_piece = BOARD_SQUARE_GET(position.covers[SIDE_BOTH], target_square);
+
+  // Check so the target exist if there is a capture
+  if(((move & MOVE_MASK_CAPTURE) ? 1 : 0) ^ target_is_piece)
+  {
+    return false;
+  }
+
+  bool source_is_white = BOARD_SQUARE_GET(position.covers[SIDE_WHITE], source_square);
+  bool target_is_white = BOARD_SQUARE_GET(position.covers[SIDE_WHITE], target_square);
+
+  // Check so source piece and target piece are not on same side, in case of capture
+  if((move & MOVE_MASK_CAPTURE) && !(source_is_white ^ target_is_white))
+  {
+    return false;
+  }
+
+  // Check so there are no pieces in the way
   if(BOARD_LINES[source_square][target_square] & position.covers[SIDE_BOTH])
   {
     return false;
   }
 
-  Piece source_piece = MOVE_PIECE_GET(move);
-
-  // If the moving piece does not exists on the source square
-  if(!BOARD_SQUARE_GET(position.boards[source_piece], source_square))
+  // Check so the piece is able to move from source square to target square
+  if(!(attacks_get(source_square, position) & (1ULL << target_square)))
   {
     return false;
   }
 
-  Piece target_piece = square_piece_get(position.boards, target_square);
-
-  // If the capture flag and the target piece doesn't match each other
-  if(((move & MOVE_MASK_CAPTURE) ? 1 : 0) ^ (target_piece != PIECE_NONE))
-  {
-    return false;
-  }
-
-  bool sourceWhite = (source_piece >= PIECE_WHITE_PAWN && source_piece <= PIECE_WHITE_KING);
-  bool targetWhite = (target_piece >= PIECE_WHITE_PAWN && target_piece <= PIECE_WHITE_KING);
-
-  // If a target piece exists (capture) and 
-  // source and target are not of different sides (same sides)
-  if((move & MOVE_MASK_CAPTURE) && !(sourceWhite ^ targetWhite))
-  {
-    return false;
-  }
-
-  // The piece is able to move from source_square to target_square
-  return (attacks_get(source_square, position) & (1ULL << target_square));
+  return true;
 }
 
 /*
@@ -440,7 +444,7 @@ static bool move_is_pseudo_legal(Position position, Move move)
 /*
  * Get the square of the king of the supplied side
  */
-static Square king_square_get(Position position, Side side)
+Square king_square_get(Position position, Side side)
 {
   Piece king_piece = (side == SIDE_WHITE) ? PIECE_WHITE_KING : PIECE_BLACK_KING;
 
