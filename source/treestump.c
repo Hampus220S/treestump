@@ -18,11 +18,6 @@ static struct argp_option options[] =
   { 0 }
 };
 
-struct args
-{
-  bool debug;
-};
-
 struct args args =
 {
   .debug = false
@@ -145,7 +140,7 @@ int main(int argc, char* argv[])
   signals_handler_setup();
 
 
-  info_print("Start of main");
+  if(args.debug) info_print("Start of main");
 
   all_init();
 
@@ -164,7 +159,7 @@ int main(int argc, char* argv[])
   }
   while(strcmp(uci_string, "quit") != 0);
 
-  info_print("End of main");
+  if(args.debug) info_print("End of main");
 
   return 0;
 }

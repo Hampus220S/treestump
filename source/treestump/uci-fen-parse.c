@@ -22,7 +22,7 @@ static size_t string_split_at_delim(char** string_array, const char* string, con
 {
   if(!string_array || !string)
   {
-    error_print("String array or string not allocated");
+    if(args.debug) error_print("String array or string not allocated");
 
     return 0;
   }
@@ -191,7 +191,7 @@ static int fen_boards_parse(U64 boards[12], const char string[])
 
   if((split_count = string_split_at_delim(string_array, string, "/", BOARD_RANKS)) < BOARD_RANKS)
   {
-    error_print("Failed to split fen board string");
+    if(args.debug) error_print("Failed to split fen board string");
 
     string_array_free(string_array, split_count);
 
@@ -228,7 +228,7 @@ static int fen_boards_parse(U64 boards[12], const char string[])
       }
       else
       {
-        error_print("Unknown fen symbol: (%c)", symbol);
+        if(args.debug) error_print("Unknown fen symbol: (%c)", symbol);
       }
     }
   }
@@ -241,54 +241,66 @@ static int fen_boards_parse(U64 boards[12], const char string[])
 /*
  *
  */
-static void fen_index_part_parse(Position* position, int index, const char* string)
+static bool fen_index_part_parse(Position* position, int index, const char* string)
 {
   switch(index)
   {
     case 0:
       if(fen_boards_parse(position->boards, string) != 0)
       {
-        error_print("Failed to parse fen board");
+        if(args.debug) error_print("Failed to parse fen board");
+
+        return false;
       }
-      break;
+      return true;
 
     case 1:
       if(fen_side_parse(&position->side, string) != 0)
       {
-        error_print("Failed to parse fen side");
+        if(args.debug) error_print("Failed to parse fen side");
+
+        return false;
       }
-      break;
+      return true;
 
     case 2:
       if(fen_castle_parse(&position->castle, string) != 0)
       {
-        error_print("Failed to parse fen castle");
+        if(args.debug) error_print("Failed to parse fen castle");
+
+        return false;
       }
-      break;
+      return true;
 
     case 3:
       if(fen_passant_parse(&position->passant, string) != 0)
       {
-        error_print("Failed to parse fen passant");
+        if(args.debug) error_print("Failed to parse fen passant");
+
+        return false;
       }
-      break;
+      return true;
 
     case 4:
       if(fen_clock_parse(&position->clock, string) != 0)
       {
-        error_print("Failed to parse fen clock");
+        if(args.debug) error_print("Failed to parse fen clock");
+
+        return false;
       }
-      break;
+      return true;
 
     case 5:
       if(fen_turns_parse(&position->turns, string) != 0)
       {
-        error_print("Failed to parse fen turns");
+        if(args.debug) error_print("Failed to parse fen turns");
+
+        return false;
       }
-      break;
+      return true;
 
     default:
-      break;
+      return false;
   }
 }
 
@@ -301,7 +313,7 @@ static void fen_index_part_parse(Position* position, int index, const char* stri
  */
 int fen_parse(Position* position, const char* fen_string)
 {
-  info_print("Parsing fen (%s)", fen_string);
+  if(args.debug) info_print("Parsing fen (%s)", fen_string);
 
   char* string_array[6];
 
@@ -309,17 +321,26 @@ int fen_parse(Position* position, const char* fen_string)
 
   if((split_count = string_split_at_delim(string_array, fen_string, " ", 6)) < 4)
   {
-    error_print("Failed to split fen string");
+    if(args.debug) error_print("Failed to split fen string");
 
     string_array_free(string_array, split_count);
 
     return 1;
   }
 
+  Position temp_position;
+
   for(int index = 0; index < split_count; index++)
   {
-    fen_index_part_parse(position, index, string_array[index]);
+    if(!fen_index_part_parse(&temp_position, index, string_array[index]))
+    {
+      string_array_free(string_array, split_count);
+
+      return 2;
+    }
   }
+
+  *position = temp_position;
 
   string_array_free(string_array, split_count);
 
@@ -340,7 +361,7 @@ int fen_parse(Position* position, const char* fen_string)
   position->covers[SIDE_BOTH] = position->covers[SIDE_WHITE] | position->covers[SIDE_BLACK];
 
 
-  info_print("Parsed fen");
+  if(args.debug) info_print("Parsed fen");
 
   return 0;
 }

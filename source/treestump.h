@@ -16,6 +16,13 @@
 
 #include "debug.h"
 
+struct args
+{
+  bool debug;
+};
+
+extern struct args args;
+
 typedef unsigned long long  U64;
 typedef unsigned long       U32;
 

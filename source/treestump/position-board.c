@@ -70,7 +70,7 @@ static U64 board_line_create(Square source, Square target)
  */
 void board_lines_init(void)
 {
-  info_print("Initializing board lines");
+  if(args.debug) info_print("Initializing board lines");
 
   for(Square sourceSquare = A8; sourceSquare <= H1; sourceSquare++)
   {

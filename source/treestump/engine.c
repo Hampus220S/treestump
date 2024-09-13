@@ -8,65 +8,12 @@
 
 #include "engine-intern.h"
 
-U64 perft_driver(Position position, int depth)
-{
-  if(depth <= 0) return 1;
-
-  MoveArray moveArray;
-
-  memset(moveArray.moves, 0, sizeof(moveArray.moves));
-  moveArray.amount = 0;
-
-  moves_create(&moveArray, position);
-
-  int nodes = 0;
-
-  for(int index = 0; index < moveArray.amount; index++)
-  {
-    Position positionCopy = position;
-
-    move_make(&positionCopy, moveArray.moves[index]);
-
-    nodes += perft_driver(positionCopy, depth - 1);
-  }
-  return nodes;
-}
-
-void perft_test(Position position, int depth)
-{
-  MoveArray moveArray;
-
-  memset(moveArray.moves, 0, sizeof(moveArray.moves));
-  moveArray.amount = 0;
-
-  moves_create(&moveArray, position);
-
-  char moveString[8];
-
-  U64 totalNodes = 0;
-
-  for(int index = 0; index < moveArray.amount; index++)
-  {
-    Position positionCopy = position;
-
-    move_make(&positionCopy, moveArray.moves[index]);
-
-    U64 moveNodes = perft_driver(positionCopy, depth - 1);
-
-    totalNodes += moveNodes;
-
-    memset(moveString, 0, sizeof(moveString));
-
-    move_string_create(moveString, moveArray.moves[index]);
-
-    printf("%s: %llu\n", moveString, moveNodes);
-  }
-  printf("\nNodes searched: %llu\n", totalNodes);
-}
-
 U64 searchedNodes = 0;
 
-int negamax(Position position, int depth, int nodes, int alpha, int beta)
+/*
+ *
+ */
+static int negamax(Position position, int depth, int nodes, int alpha, int beta)
 {
   /*
   if(nodes > 0 && searchedNodes >= nodes)
@@ -131,6 +78,9 @@ int negamax(Position position, int depth, int nodes, int alpha, int beta)
   return bestScore;
 }
 
+/*
+ *
+ */
 Move best_move(Position position, int depth, int nodes, int movetime, MoveArray searchmoves)
 {
   searchedNodes = 0;
@@ -172,7 +122,7 @@ Move best_move(Position position, int depth, int nodes, int movetime, MoveArray 
     }
   }
 
-  // printf("searchedNodes: %llu\n", searchedNodes);
+  if(args.debug) info_print("Searched nodes: %d", searchedNodes);
 
   return bestMove;
 }

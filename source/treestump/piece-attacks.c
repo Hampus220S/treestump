@@ -172,7 +172,7 @@ static void attacks_bishop_init(void)
  */
 void attacks_init(void)
 {
-  info_print("Initializing attacks");
+  if(args.debug) info_print("Initializing attacks");
 
   attacks_rook_init();
 

@@ -37,6 +37,8 @@ void bitboard_print(U64 bitboard)
  */
 void position_print(Position position)
 {
+  printf("\n");
+
   for(int rank = 0; rank < BOARD_RANKS; rank++)
   {
     for(int file = 0; file < BOARD_FILES; file++)
@@ -65,4 +67,6 @@ void position_print(Position position)
     (position.castle & CASTLE_BLACK_KING)  ? 'k' : '-',
     (position.castle & CASTLE_BLACK_QUEEN) ? 'q' : '-'
   );
+
+  printf("\n");
 }

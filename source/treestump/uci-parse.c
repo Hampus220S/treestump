@@ -44,11 +44,11 @@ static void uci_go_parse(Position position, const char goString[])
   {
     int depth = atoi(goString + 6);
 
-    info_print("Start of perft");
+    if(args.debug) info_print("Start of perft");
 
     perft_test(position, depth);
 
-    info_print("End of perft");
+    if(args.debug) info_print("End of perft");
 
     return;
   }
@@ -270,6 +270,7 @@ int uci_parse(Position* position, const char* uci_string)
   {
     position_print(*position);
 
+    /*
     for(Piece piece = PIECE_WHITE_PAWN; piece <= PIECE_BLACK_KING; piece++)
     {
       printf("piece: %c\n", PIECE_SYMBOLS[piece]);
@@ -281,6 +282,7 @@ int uci_parse(Position* position, const char* uci_string)
       printf("side: %c\n", SIDE_SYMBOLS[side]);
       bitboard_print(position->covers[side]);
     }
+    */
   }
   else if(strncmp(uci_string, "isready", 7) == 0)
   {

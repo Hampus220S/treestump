@@ -150,7 +150,7 @@ static U64 mask_rook_create(Square square)
  */
 void masks_init(void)
 {
-  info_print("Initializing masks");
+  if(args.debug) info_print("Initializing masks");
 
   for (Square square = 0; square < BOARD_SQUARES; square++)
   {
@@ -173,7 +173,7 @@ void masks_init(void)
  */
 void relevant_bits_init(void)
 {
-  info_print("Initializing relevant bits");
+  if(args.debug) info_print("Initializing relevant bits");
 
   for (Square square = 0; square < BOARD_SQUARES; square++)
   {
