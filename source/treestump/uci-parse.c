@@ -11,25 +11,25 @@
 /*
  *
  */
-static MoveArray move_strings_parse(Position position, const char movesString[])
+static MoveArray move_strings_parse(Position position, const char moves_string[])
 {
   MoveArray moveArray;
 
   memset(moveArray.moves, MOVE_NONE, sizeof(moveArray.moves));
   moveArray.amount = 0;
 
-  while(*movesString)
+  while(*moves_string)
   {
-    Move move = move_string_parse(position, movesString);
+    Move move = move_string_parse(position, moves_string);
 
     if(move != MOVE_NONE)
     {
       moveArray.moves[moveArray.amount++] = move;
     }
 
-    while(*movesString && *movesString != ' ') movesString++;
+    while(*moves_string && *moves_string != ' ') moves_string++;
 
-    movesString++;
+    moves_string++;
   }
 
   return moveArray;
@@ -135,43 +135,81 @@ static void uci_go_parse(Position position, const char goString[])
 }
 
 /*
- *
+ * RETURN (same as fen_parse, int status)
+ * - 0 | Success
+ * - 1 | Failed to parse fen
  */
-static Position uci_position_parse(const char positionString[])
+static int uci_position_fen_parse(Position* position, const char* position_string)
 {
-  Position position;
-
-  if(!strncmp(positionString, "startpos", 8))
+  if(strncmp(position_string, "startpos", 8) == 0)
   {
-    fen_parse(&position, FEN_START);
+    return fen_parse(position, FEN_START);
   }
-  else if(!strncmp(positionString, "fen", 3))
+  else if(strncmp(position_string, "fen", 3) == 0)
   {
-    fen_parse(&position, positionString + 4);
+    return fen_parse(position, position_string + 4);
   }
-  else fen_parse(&position, FEN_START);
+  else return 1;
+}
 
-
-  char* movesString = strstr(positionString, "moves");
-
-  if(movesString != NULL)
+/*
+ * RETURN (int status)
+ * - 0 | Success
+ * - 1 | Failed to parse move
+ */
+static int uci_position_moves_parse(Position* position, char* moves_string)
+{
+  while(*moves_string)
   {
-    movesString += 6;
+    Move move = move_string_parse(*position, moves_string);
 
-    while(*movesString)
+    if(move == MOVE_NONE)
     {
-      Move move = move_string_parse(position, movesString);
+      return 1;
+    }
 
-      if(move == MOVE_NONE) break;
+    move_make(position, move);
 
-      move_make(&position, move);
+    while(*moves_string && *moves_string != ' ') moves_string++;
 
-      while(*movesString && *movesString != ' ') movesString++;
+    moves_string++;
+  }
 
-      movesString++;
+  return 0;
+}
+
+/*
+ * RETURN (int status)
+ * - 0 | Success
+ * - 1 | Failed to parse position fen
+ * - 2 | Failed to parse position moves
+ */
+static int uci_position_parse(Position* position, const char* position_string)
+{
+  Position temp_position;
+
+  if(uci_position_fen_parse(&temp_position, position_string) != 0)
+  {
+    if(args.debug) error_print("Failed to parse position fen");
+
+    return 1;
+  }
+
+  char* moves_string = strstr(position_string, "moves");
+
+  if(moves_string != NULL)
+  {
+    if(uci_position_moves_parse(&temp_position, moves_string + 6) != 0)
+    {
+      if(args.debug) error_print("Failed to parse position moves");
+
+      return 2;
     }
   }
-  return position;
+
+  *position = temp_position;
+
+  return 0;
 }
 
 /*
@@ -260,7 +298,7 @@ int uci_parse(Position* position, const char* uci_string)
   }
   else if(strncmp(uci_string, "position", 8) == 0)
   {
-    *position = uci_position_parse(uci_string + 9);
+    uci_position_parse(position, uci_string + 9);
   }
   else if(strncmp(uci_string, "go", 2) == 0)
   {

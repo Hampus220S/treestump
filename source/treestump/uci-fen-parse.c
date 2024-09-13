@@ -239,9 +239,17 @@ static int fen_boards_parse(U64 boards[12], const char string[])
 }
 
 /*
- *
+ * RETURN (int status)
+ * - 0 | Success
+ * - 1 | Failed to parse fen board
+ * - 2 | Failed to parse fen side
+ * - 3 | Failed to parse fen castle
+ * - 4 | Failed to parse fen enpassant
+ * - 5 | Failed to parse fen clock
+ * - 6 | Failed to parse fen turns
+ * - 7 | Invalid index
  */
-static bool fen_index_part_parse(Position* position, int index, const char* string)
+static int fen_index_part_parse(Position* position, int index, const char* string)
 {
   switch(index)
   {
@@ -250,57 +258,57 @@ static bool fen_index_part_parse(Position* position, int index, const char* stri
       {
         if(args.debug) error_print("Failed to parse fen board");
 
-        return false;
+        return 1;
       }
-      return true;
+      return 0;
 
     case 1:
       if(fen_side_parse(&position->side, string) != 0)
       {
         if(args.debug) error_print("Failed to parse fen side");
 
-        return false;
+        return 2;
       }
-      return true;
+      return 0;
 
     case 2:
       if(fen_castle_parse(&position->castle, string) != 0)
       {
         if(args.debug) error_print("Failed to parse fen castle");
 
-        return false;
+        return 3;
       }
-      return true;
+      return 0;
 
     case 3:
       if(fen_passant_parse(&position->passant, string) != 0)
       {
         if(args.debug) error_print("Failed to parse fen passant");
 
-        return false;
+        return 4;
       }
-      return true;
+      return 0;
 
     case 4:
       if(fen_clock_parse(&position->clock, string) != 0)
       {
         if(args.debug) error_print("Failed to parse fen clock");
 
-        return false;
+        return 5;
       }
-      return true;
+      return 0;
 
     case 5:
       if(fen_turns_parse(&position->turns, string) != 0)
       {
         if(args.debug) error_print("Failed to parse fen turns");
 
-        return false;
+        return 6;
       }
-      return true;
+      return 0;
 
     default:
-      return false;
+      return 7;
   }
 }
 
@@ -332,7 +340,7 @@ int fen_parse(Position* position, const char* fen_string)
 
   for(int index = 0; index < split_count; index++)
   {
-    if(!fen_index_part_parse(&temp_position, index, string_array[index]))
+    if(fen_index_part_parse(&temp_position, index, string_array[index]) != 0)
     {
       string_array_free(string_array, split_count);
 
